@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>건물 방향 선택</title>
+<script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=101abfc1122832bf82c274c879984a27&libraries=services&autoload=false"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Pretendard',-apple-system,sans-serif;background:#1a1a2e;color:#fff;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+#mapwrap{position:relative;flex:1}
+#map{width:100%;height:100%}
+.north{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.75);color:#fff;font-size:12px;font-weight:700;padding:3px 10px;border-radius:12px;pointer-events:none;z-index:10;letter-spacing:1px}
+.bottom{padding:14px 16px;background:#16213e;border-top:1px solid #334;display:flex;flex-direction:column;gap:10px}
+.lbl{font-size:12px;color:#aaa}
+.btns{display:flex;gap:8px}
+.dbtn{flex:1;padding:9px 0;border-radius:8px;border:2px solid #334;background:#0f3460;color:#ccc;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;text-align:center}
+.dbtn:hover{border-color:#4f8cff;color:#fff}
+.dbtn.on{border-color:#4f8cff;background:rgba(79,140,255,.3);color:#fff}
+.dbtn.disabled{opacity:.3;cursor:not-allowed}
+.row{display:flex;align-items:center;gap:12px}
+.result{flex:1;font-size:14px;font-weight:700;color:#4f8cff;min-height:22px}
+.confirm{padding:9px 22px;border-radius:8px;border:none;background:#4f8cff;color:#fff;font-size:14px;font-weight:700;cursor:pointer;display:none;white-space:nowrap}
+.confirm:hover{background:#3a7aef}
+.errmsg{color:#f87171;font-size:13px;padding:20px;text-align:center}
+</style>
+</head>
+<body>
+<div id="mapwrap">
+  <div id="map"></div>
+  <div class="north">N ▲</div>
+</div>
+<div class="bottom">
+  <div class="lbl">🧭 방향 선택 (최대 2개 조합 가능 · 반대 방향 선택 불가)</div>
+  <div class="btns">
+    <button class="dbtn" data-d="북">북향</button>
+    <button class="dbtn" data-d="동">동향</button>
+    <button class="dbtn" data-d="남">남향</button>
+    <button class="dbtn" data-d="서">서향</button>
+  </div>
+  <div class="row">
+    <div class="result" id="result"></div>
+    <button class="confirm" id="confirm">이 방향으로 선택 ✓</button>
+  </div>
+</div>
+
+<script>
+var params=new URLSearchParams(location.search);
+var lat=parseFloat(params.get('lat')),lng=parseFloat(params.get('lng'));
+var prefix=params.get('prefix')||'l';
+
+var COMBO={
+  남:{동:'남동향',서:'남서향'},
+  북:{동:'북동향',서:'북서향'},
+  동:{남:'남동향',북:'북동향'},
+  서:{남:'남서향',북:'북서향'}
+};
+var OPPOSITE={북:'남',남:'북',동:'서',서:'동'};
+
+// 방향 선택 로직 — 지도 로드와 무관하게 즉시 실행
+var sel=[];
+var resultEl=document.getElementById('result');
+var confirmBtn=document.getElementById('confirm');
+var btns=document.querySelectorAll('.dbtn');
+
+function calcDir(){
+  if(sel.length===0)return'';
+  if(sel.length===1)return sel[0]+'향';
+  return(COMBO[sel[0]]&&COMBO[sel[0]][sel[1]])||(COMBO[sel[1]]&&COMBO[sel[1]][sel[0]])||'';
+}
+
+function updateUI(){
+  var v=calcDir();
+  resultEl.textContent=sel.length===0?'':(v?'선택: '+v:'⚠️ 조합 불가');
+  confirmBtn.style.display=(v&&sel.length>0)?'inline-block':'none';
+  confirmBtn.dataset.val=v||'';
+  btns.forEach(function(b){
+    var d=b.dataset.d;
+    if(sel.length===1&&OPPOSITE[sel[0]]===d){
+      b.classList.add('disabled');
+    } else if(sel.length>=2&&!b.classList.contains('on')){
+      b.classList.add('disabled');
+    } else {
+      b.classList.remove('disabled');
+    }
+  });
+}
+
+btns.forEach(function(btn){
+  btn.addEventListener('click',function(){
+    if(btn.classList.contains('disabled'))return;
+    var d=btn.dataset.d;
+    if(btn.classList.contains('on')){
+      btn.classList.remove('on');
+      sel=sel.filter(function(x){return x!==d;});
+    } else {
+      btn.classList.add('on');
+      sel.push(d);
+    }
+    updateUI();
+  });
+});
+
+confirmBtn.addEventListener('click',function(){
+  var v=confirmBtn.dataset.val;
+  if(v){
+    if(window.opener&&!window.opener.closed){
+      try{window.opener._setDirFromPopup(prefix,v);}catch(e){}
+      window.opener.postMessage({type:'setDir',prefix:prefix,val:v},'*');
+    }
+  }
+  window.close();
+});
+
+// 지도 — 방향 선택과 독립적으로 로드
+if(lat&&lng){
+  kakao.maps.load(function(){
+    try{
+      var pos=new kakao.maps.LatLng(lat,lng);
+      var map=new kakao.maps.Map(document.getElementById('map'),{center:pos,level:2});
+      map.addOverlayMapTypeId(kakao.maps.MapTypeId.HYBRID);
+      new kakao.maps.Marker({position:pos,map:map});
+    }catch(e){}
+  });
+} else {
+  document.getElementById('map').innerHTML='<div class="errmsg">좌표 정보가 없습니다.<br>건축물대장 조회 후 다시 시도해주세요.</div>';
+}
+</script>
+</body>
+</html>
