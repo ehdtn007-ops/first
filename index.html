@@ -6631,6 +6631,8 @@ async function excelUpload(event){
     if(!rows.length){alert('엑셀에 데이터가 없습니다.');return;}
     if(!confirm(`${rows.length}건을 업로드합니다.\n기존 매물과 LID가 같으면 덮어쓰고, 없으면 새로 추가합니다.\n계속할까요?`))return;
     let added=0,updated=0;
+    let maxNo=BASE_DATA.reduce((mx,b)=>Math.max(mx,b.no||0),0);
+    const newLids=[];
     for(const row of rows){
       const lid=row['LID']||('xl'+Date.now()+'_'+(Math.random()*9999|0));
       const isRent=(row['거래']||'매매')==='월세';
@@ -6655,12 +6657,58 @@ async function excelUpload(event){
       };
       const existIdx=BASE_DATA.findIndex(b=>b.lid===lid);
       if(existIdx>=0){BASE_DATA[existIdx]={...BASE_DATA[existIdx],...item};updated++;}
-      else{BASE_DATA.push(item);added++;}
+      else{item.no=++maxNo;newLids.push(lid);BASE_DATA.push(item);added++;}
       await db.collection('base_listings').doc(lid).set(item,{merge:true});
     }
     BASE=BASE_DATA.filter(b=>!b._deleted);
     render();renderAListings();
     alert(`✅ 업로드 완료!\n추가: ${added}건 | 수정: ${updated}건`);
+    // 건축물대장 자동 일괄조회 (엑셀 업로드 후)
+    const bldgTargets=newLids.map(lid=>BASE_DATA.find(b=>b.lid===lid)).filter(b=>b&&b.jibun);
+    if(bldgTargets.length){
+      const doBldg=confirm(`새로 추가된 ${bldgTargets.length}건에 대해 건축물대장을 자동 조회할까요?`);
+      if(doBldg){
+        const BK='60b9aa20b5a6ba28ef15c313109fd19d4303f1e175c24af104b70690a2eac0bd';
+        let bOk=0,bFail=0,consecutiveFails=0;
+        for(let bi=0;bi<bldgTargets.length;bi++){
+          const item=bldgTargets[bi];
+          try{
+            if(!geocoderObj&&typeof kakao!=='undefined'&&kakao.maps&&kakao.maps.services)try{geocoderObj=new kakao.maps.services.Geocoder();}catch(e){}
+            const addr=[item.prov,item.area,item.dong,item.jibun].filter(Boolean).join(' ');
+            let bcode='',bun='0000',ji='0000';
+            if(geocoderObj){
+              const gr=await new Promise(function(res,rej){geocoderObj.addressSearch(addr,function(r,s){if(r&&r.length>0)res(r);else rej(new Error('주소실패'));});}).catch(function(){return null;});
+              if(gr&&gr[0]){bcode=(gr[0].address&&gr[0].address.b_code)||'';bun=((gr[0].address&&gr[0].address.main_address_no)||'0').padStart(4,'0');ji=((gr[0].address&&gr[0].address.sub_address_no)||'0').padStart(4,'0');}
+            }
+            if(!bcode||bcode.length<10)throw new Error('주소코드 실패');
+            const scd=bcode.substring(0,5),bcd=bcode.substring(5,10);
+            const base='https://apis.data.go.kr/1613000/BldRgstHubService';
+            const cp='?serviceKey='+encodeURIComponent(BK)+'&sigunguCd='+scd+'&bjdongCd='+bcd+'&bun='+bun+'&ji='+ji+'&numOfRows=5&pageNo=1&_type=json';
+            let bd=null;
+            const r1=await fetch(base+'/getBrTitleInfo'+cp);const j1=await r1.json();const i1=j1&&j1.response&&j1.response.body&&j1.response.body.items&&j1.response.body.items.item;bd=Array.isArray(i1)?i1[0]:i1;
+            if(!bd){const r2=await fetch(base+'/getBrRecapTitleInfo'+cp);const j2=await r2.json();const i2=j2&&j2.response&&j2.response.body&&j2.response.body.items&&j2.response.body.items.item;bd=Array.isArray(i2)?i2[0]:i2;}
+            if(!bd)throw new Error('대장 없음');
+            const upd={};
+            if(bd.grndFlrCnt){upd.totalfloor=parseInt(bd.grndFlrCnt)||0;item.totalfloor=upd.totalfloor;}
+            const pk=(parseInt(bd.indrMechUtcnt)||0)+(parseInt(bd.indrAutoUtcnt)||0)+(parseInt(bd.oudrMechUtcnt)||0)+(parseInt(bd.oudrAutoUtcnt)||0);
+            if(pk>0){upd.parking=pk;item.parking=pk;}
+            if(bd.useAprDay&&bd.useAprDay.length>=8){upd.year=parseInt(bd.useAprDay.substring(0,4));upd.approvedate=bd.useAprDay.substring(0,4)+'-'+bd.useAprDay.substring(4,6)+'-'+bd.useAprDay.substring(6,8);item.year=upd.year;item.approvedate=upd.approvedate;}
+            if(bd.totArea){upd.area2=Math.round(parseFloat(bd.totArea));item.area2=upd.area2;}
+            if(bd.mainPurpsCdNm){upd.mainPurpose=bd.mainPurpsCdNm;item.mainPurpose=upd.mainPurpose;}
+            if(bd.vlawBldYn==='Y'){upd.illegal='위반건축물';item.illegal='위반건축물';}
+            await db.collection('base_listings').doc(item.lid).update(upd).catch(function(e){console.error('DB오류:',e);});
+            bOk++;consecutiveFails=0;
+          }catch(e){bFail++;consecutiveFails++;
+            if(consecutiveFails>=3){await new Promise(r=>setTimeout(r,3000));consecutiveFails=0;}
+          }
+          // 건당 800ms 딜레이 (API 과부하 방지)
+          await new Promise(r=>setTimeout(r,800));
+        }
+        BASE=BASE_DATA.filter(b=>!b._deleted);
+        render();
+        alert(`🏛️ 건축물대장 조회 완료!\n성공: ${bOk}건 | 실패: ${bFail}건`);
+      }
+    }
   }catch(e){
     console.error('엑셀 업로드 오류:',e);
     alert('⚠️ 업로드 실패: '+e.message);
