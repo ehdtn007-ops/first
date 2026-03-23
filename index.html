@@ -169,7 +169,7 @@ header{display:flex;align-items:center;gap:14px;padding:0 18px;height:54px;backg
 .bcard-total{font-size:11px;color:var(--red);font-weight:700;margin-bottom:6px}
 .bcard-meta{display:flex;gap:8px;flex-wrap:wrap;font-size:11px;color:var(--text2)}
 .bcard-addr{font-size:11px;color:var(--text2);margin-bottom:6px;display:flex;align-items:center;gap:3px}
-.bcard-fav{position:absolute;top:12px;right:12px;background:none;border:none;font-size:17px;cursor:pointer;opacity:.4;transition:opacity .2s,transform .2s;line-height:1}
+.bcard-fav{background:none;border:none;font-size:17px;cursor:pointer;opacity:.4;transition:opacity .2s,transform .2s;line-height:1;padding:0;flex-shrink:0}
 .bcard-fav:hover{opacity:1;transform:scale(1.2)}
 .bcard-fav.on{opacity:1}
 .board-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;color:var(--text2);gap:10px;font-size:14px}
@@ -2195,17 +2195,19 @@ function renderBoard(){
     card.className='bcard'+(isSel?' selected':'');
     card.innerHTML=`
       ${showChk?`<div class="bcard-chk" onclick="toggleBoardSelect('${item.lid}',event)">✓</div>`:''}
-      <button class="bcard-fav ${isFav?'on':''}" onclick="event.stopPropagation();toggleFavBoard('${item.lid}',this)">${isFav?'❤️':'🤍'}</button>
       <div class="bcard-top" style="${showChk?'padding-left:28px':''}">
         <div class="bcard-tags">
           <span class="dtag ${pinClass(item)}">${combiLabel(item)}</span>
         </div>
-        <div class="bcard-date">${fmtDateAgo(item.registeredAt)}</div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0">
+          <div style="display:flex;align-items:center;gap:6px">
+            ${(item.num||item.no)?`<span style="font-size:10px;font-weight:800;color:#1a1200;background:#FEE500;border-radius:5px;padding:2px 8px;white-space:nowrap">No.${item.num||item.no}</span>`:''}
+            <button class="bcard-fav ${isFav?'on':''}" onclick="event.stopPropagation();toggleFavBoard('${item.lid}',this)">${isFav?'❤️':'🤍'}</button>
+          </div>
+          <div class="bcard-date">${fmtDateAgo(item.registeredAt)}</div>
+        </div>
       </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:2px">
-        <div class="bcard-name" style="margin-bottom:0;flex:1;min-width:0">${item.name}</div>
-        ${(item.num||item.no)?`<span style="font-size:10px;font-weight:800;color:#1a1200;background:#FEE500;border-radius:5px;padding:2px 8px;white-space:nowrap;flex-shrink:0">No.${item.num||item.no}</span>`:''}
-      </div>
+      <div class="bcard-name">${item.name}</div>
       <div class="bcard-addr">📍 ${currentUser?fullAddr(item):maskAddr(item)}</div>
       <div class="bcard-price">${isRent?`보증금 ${won(item.deposit||0)} / 월 ${won(item.monthly||0)}`:won(item.price||0)}</div>
       ${isRent?`<div class="bcard-total">합계 ${won(tot)} <span style="font-size:10px;opacity:.7">(보증금+권리금)</span></div>`:''}
