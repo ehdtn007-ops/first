@@ -15,6 +15,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 <!-- 카카오 공유 SDK -->
 <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js" crossorigin="anonymous"></script>
 <script>
@@ -29,6 +30,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
+const storage = firebase.storage();
 // 카카오 공유 SDK 초기화
 if(typeof Kakao!=='undefined'&&!Kakao.isInitialized()){
   Kakao.init('101abfc1122832bf82c274c879984a27');
@@ -85,6 +87,25 @@ textarea.fi{resize:vertical;min-height:80px;line-height:1.6}
 .hint-box{margin-top:12px;padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:12px;color:var(--text2);line-height:1.8}
 .hidden{display:none!important}
 .sucmsg{background:rgba(62,207,142,.1);border:1px solid rgba(62,207,142,.3);color:var(--green);border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:13px;line-height:1.7}
+
+/* ═══ 이미지 갤러리 ═══ */
+.img-gallery{position:relative;width:100%;background:#000;border-bottom:1px solid var(--border);overflow:hidden}
+.img-gallery img{width:100%;height:220px;object-fit:contain;display:block}
+.img-gallery-empty{width:100%;height:100px;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:13px;background:var(--surface2)}
+.img-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.55);color:#fff;border:none;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.img-nav:hover{background:rgba(0,0,0,.8)}
+.img-nav.prev{left:8px}
+.img-nav.next{right:8px}
+.img-counter{position:absolute;bottom:8px;right:10px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;padding:2px 8px;border-radius:10px}
+.img-upload-area{border:2px dashed var(--border);border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:border-color .2s;margin-bottom:8px}
+.img-upload-area:hover{border-color:var(--accent)}
+.img-upload-area.dragover{border-color:var(--accent);background:rgba(79,140,255,.06)}
+.img-thumbs{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.img-thumb{width:60px;height:60px;border-radius:6px;object-fit:cover;border:2px solid var(--border);position:relative}
+.img-thumb-wrap{position:relative;display:inline-block}
+.img-thumb-del{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;border:none;width:18px;height:18px;border-radius:50%;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+/* ═══ 최근 본 매물 ═══ */
+.recent-empty{text-align:center;padding:30px 10px;color:var(--text3);font-size:13px}
 
 /* ═══ 헤더 ═══ */
 header{display:flex;align-items:center;gap:14px;padding:0 18px;height:54px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;z-index:100}
@@ -720,6 +741,15 @@ select:hover,select:focus{border-color:var(--accent)}
       </div>
     </div>
 
+    <div class="fsec">📷 매물 사진</div>
+    <div class="fg">
+        <div class="img-upload-area" id="img-upload-area" onclick="document.getElementById('img-file-input').click()">
+          📁 클릭하거나 이미지를 드래그하세요 (최대 5장)
+        </div>
+        <input type="file" id="img-file-input" accept="image/*" multiple style="display:none" onchange="handleImgSelect(this.files)">
+        <div class="img-thumbs" id="img-thumbs"></div>
+        <div id="img-upload-status" style="font-size:11px;color:var(--text2);margin-top:4px"></div>
+      </div>
     <div class="fsec">📝 매물 특징 설명</div>
     <div class="fg"><label class="fl">자유 서술 (특징, 장점, 주변환경 등)</label>
       <textarea class="fi" id="ldesc" style="min-height:100px" placeholder="예: 강남역 도보 3분 거리의 역세권 고시원입니다. 전 객실 에어컨/냉장고 풀옵션, 현재 만실 운영중이며 수익률 약 8% 수준입니다. 리모델링 2022년 완료로 내부 깔끔합니다."></textarea>
@@ -917,6 +947,15 @@ select:hover,select:focus{border-color:var(--accent)}
         </select>
       </div>
     </div>
+    <div class="fsec">📷 매물 사진</div>
+    <div class="fg">
+        <div class="img-upload-area" id="eimg-upload-area" onclick="document.getElementById('eimg-file-input').click()">
+          📁 클릭하거나 이미지를 드래그하세요 (최대 5장)
+        </div>
+        <input type="file" id="eimg-file-input" accept="image/*" multiple style="display:none" onchange="handleEditImgSelect(this.files)">
+        <div class="img-thumbs" id="eimg-thumbs"></div>
+        <div id="eimg-upload-status" style="font-size:11px;color:var(--text2);margin-top:4px"></div>
+      </div>
     <div class="fsec">📝 매물 특징 설명</div>
     <div class="fg">
       <textarea class="fi" id="eldesc" style="min-height:100px"></textarea>
@@ -1074,6 +1113,8 @@ select:hover,select:focus{border-color:var(--accent)}
         </div>
         <div class="dpop-addr" id="dp-addr"></div>
       </div>
+      <!-- 이미지 갤러리 -->
+      <div id="dp-gallery"></div>
       <!-- 금액 블록 -->
       <div class="dpop-price-block" id="dp-price-block"></div>
       <!-- 특징 설명 -->
@@ -1117,6 +1158,7 @@ select:hover,select:focus{border-color:var(--accent)}
     <div class="panel-tabs">
       <div class="ptab active" onclick="switchTab('list')" id="tab-list">📋 매물목록</div>
       <div class="ptab" onclick="switchTab('fav')" id="tab-fav">❤️ 찜목록 <span id="fav-cnt" style="color:var(--red);font-size:11px"></span></div>
+      <div class="ptab" onclick="switchTab('recent')" id="tab-recent">🕐 최근본</div>
     </div>
 
     <div class="panel-content">
@@ -1124,6 +1166,7 @@ select:hover,select:focus{border-color:var(--accent)}
         <div style="padding:2px 2px 0;font-size:11px;color:var(--text2)">검색된 매물 <span id="pc" style="color:var(--accent);font-weight:700">0</span>건</div>
       </div>
       <div class="panel-section hidden" id="sec-fav"></div>
+      <div class="panel-section hidden" id="sec-recent"></div>
     </div>
   </div>
 
@@ -2308,9 +2351,12 @@ function switchTab(t){
   currentTab=t;
   document.getElementById('tab-list').classList.toggle('active',t==='list');
   document.getElementById('tab-fav').classList.toggle('active',t==='fav');
+  document.getElementById('tab-recent').classList.toggle('active',t==='recent');
   document.getElementById('sec-list').classList.toggle('hidden',t!=='list');
   document.getElementById('sec-fav').classList.toggle('hidden',t!=='fav');
+  document.getElementById('sec-recent').classList.toggle('hidden',t!=='recent');
   if(t==='fav')renderFavList();
+  if(t==='recent')renderRecentList();
 }
 
 // ════════════════════════════════════════════
@@ -2343,6 +2389,7 @@ function render(){
   document.getElementById('total-badge').textContent=`${items.length}건`;
   document.getElementById('pc').textContent=listItems.length;
   updateFavBadge();
+  if(document.getElementById('tab-recent')&&document.getElementById('tab-recent').classList.contains('active'))renderRecentList();
 
   const listEl=document.getElementById('sec-list');
   while(listEl.children.length>1)listEl.removeChild(listEl.lastChild);
@@ -2359,6 +2406,7 @@ function render(){
       const investSum=isRent?((item.deposit||0)+(item.keymoney||0)):0;
       c.innerHTML=`
         <button class="card-fav ${isFav?'on':''}" onclick="event.stopPropagation();toggleFav('${item.lid}')">${isFav?'❤️':'🤍'}</button>
+        ${item.images&&item.images.length?`<div style="width:100%;height:80px;overflow:hidden;border-radius:8px;margin-bottom:6px"><img src="${item.images[0]}" style="width:100%;height:100%;object-fit:cover" loading="lazy"></div>`:''}
         <div class="ctop">
           <div style="display:flex;gap:4px"><span class="dtag ${pinClass(item)}">${combiLabel(item)}</span></div>
           <span class="cprice">${isRent?`보${wonShort(item.deposit)}/월${wonShort(item.monthly||0)}`:wonShort(item.price)}</span>
@@ -2717,6 +2765,8 @@ function renderFavList(){
 // ════════════════════════════════════════════
 function showPopup(item){
   activePopupItem=item;
+  renderGallery(item);
+  addRecent(item.lid);
   const shareBtn=document.getElementById('dpop-share');
   if(shareBtn){
     shareBtn.style.display='';
@@ -3124,6 +3174,7 @@ function openListing(){
   } else {
     agentRow.classList.add('hidden');
   }
+  _pendingImages=[];document.getElementById('img-thumbs').innerHTML='';document.getElementById('img-upload-status').textContent='';
   show('ov-listing');
 }
 function doAddListing(){
@@ -3166,6 +3217,7 @@ function doAddListing(){
     memo:document.getElementById('lmemo').value.trim()||'',
     mainPurpose:document.getElementById('lmainPurpose').value.trim()||'',
     registeredAt:Date.now(),
+    images:[],
   };
   // 마스터: 선택된 담당자 정보 저장
   if(currentUser.role==='master'){
@@ -3179,23 +3231,35 @@ function doAddListing(){
   }
   if(currentUser.role==='master'){
     BASE_DATA.push(lst); BASE.push(lst);
-    db.collection('base_listings').doc(lst.lid).set(lst).then(()=>{
+    db.collection('base_listings').doc(lst.lid).set(lst).then(async()=>{
       closeAll();err.classList.remove('show');render();
       alert('매물이 등록되었습니다!');
       show('ov-admin');renderAListings();
       // 등록 후 좌표 계산해서 Firestore에 저장
       resolveAndSaveCoords(lst,null,false,null);
+      // 이미지 업로드
+      if(_pendingImages.length){
+        var imgs=await uploadImages(lst.lid,_pendingImages);
+        if(imgs.length){lst.images=imgs;db.collection('base_listings').doc(lst.lid).update({images:imgs}).catch(function(e){console.error('이미지 저장 실패:',e);});}
+        _pendingImages=[];
+      }
     }).catch(e=>{console.error('매물 등록 저장 실패:',e);alert('저장 중 오류가 발생했습니다.');});
   } else {
     const u=users.find(u=>u.id===currentUser.id);
     if(!u.listings)u.listings=[];
     u.listings.push(lst);
-    db.collection('users').doc(u.id).set(u).then(()=>{
+    db.collection('users').doc(u.id).set(u).then(async()=>{
       closeAll();err.classList.remove('show');render();
       alert('매물이 등록되었습니다!');
       openMyListings();
       // 등록 후 좌표 계산해서 Firestore에 저장
       resolveAndSaveCoords(lst,null,true,u);
+      // 이미지 업로드
+      if(_pendingImages.length){
+        var imgs=await uploadImages(lst.lid,_pendingImages);
+        if(imgs.length){lst.images=imgs;var li=u.listings.find(function(l){return l.lid===lst.lid;});if(li)li.images=imgs;db.collection('users').doc(u.id).set(u).catch(function(e){console.error('이미지 저장 실패:',e);});}
+        _pendingImages=[];
+      }
     }).catch(e=>{console.error('매물 등록 저장 실패:',e);alert('저장 중 오류가 발생했습니다.');});
   }
 }
@@ -4859,6 +4923,10 @@ function openEditListing(){
   // lid 저장
   document.getElementById('ov-edit-listing').dataset.lid=item.lid;
   document.getElementById('ov-edit-listing').dataset.ownerid=item.ownerId||'';
+  // 이미지 초기화 및 기존 이미지 로드
+  _editImages=(item.images||[]).slice();
+  renderImgThumbs('eimg-thumbs',_editImages);
+  document.getElementById('eimg-upload-status').textContent='';
   closePopupSilent();
   // 모바일에서 팝업 닫아도 패널 숨긴 상태 유지 후 모달 열기
   show('ov-edit-listing');
@@ -4906,6 +4974,7 @@ function doEditListing(){
     desc:document.getElementById('eldesc').value.trim()||'',
     memo:document.getElementById('elmemo').value.trim()||'',
     mainPurpose:document.getElementById('elmainPurpose').value.trim()||'',
+    images:_editImages.filter(function(f){return typeof f==='string';}),
   };
 
   if(ownerId){
@@ -4920,10 +4989,16 @@ function doEditListing(){
         }
         u.listings[idx]={...u.listings[idx],...updated};
         const savedLst=u.listings[idx];
-        db.collection('users').doc(u.id).set(u).then(()=>{
+        db.collection('users').doc(u.id).set(u).then(async()=>{
           console.log('매물 수정 저장 완료');
           // 수정 후 좌표 재계산
           resolveAndSaveCoords(savedLst,null,true,u);
+          // 이미지 업로드
+          var newFiles=_editImages.filter(function(f){return typeof f!=='string';});
+          if(newFiles.length){
+            var newUrls=await uploadImages(lid,newFiles);
+            if(newUrls.length){savedLst.images=(savedLst.images||[]).concat(newUrls);u.listings[idx].images=savedLst.images;db.collection('users').doc(u.id).set(u).catch(function(e){console.error('이미지 저장 실패:',e);});}
+          }
         }).catch(e=>{console.error('매물 수정 저장 실패:',e);alert('저장 중 오류가 발생했습니다. 인터넷 연결을 확인하세요.');});
       }
     }
@@ -4936,10 +5011,16 @@ function doEditListing(){
       }
       Object.assign(BASE[idx],updated);
       const savedLst=BASE[idx];
-      db.collection('base_listings').doc(lid).set(savedLst).then(()=>{
+      db.collection('base_listings').doc(lid).set(savedLst).then(async()=>{
         console.log('기본매물 수정 저장 완료');
         // 수정 후 좌표 재계산
         resolveAndSaveCoords(savedLst,null,false,null);
+        // 이미지 업로드
+        var newFiles2=_editImages.filter(function(f){return typeof f!=='string';});
+        if(newFiles2.length){
+          var newUrls2=await uploadImages(lid,newFiles2);
+          if(newUrls2.length){savedLst.images=(savedLst.images||[]).concat(newUrls2);db.collection('base_listings').doc(lid).update({images:savedLst.images}).catch(function(e){console.error('이미지 저장 실패:',e);});}
+        }
       }).catch(e=>{console.error('기본매물 수정 저장 실패:',e);});
     }
   }
@@ -6463,6 +6544,158 @@ async function excelUpload(event){
 }
 
 loadFromFirebase();
+
+// ════════════════════════════════════════════
+// 이미지 업로드 (Firebase Storage)
+// ════════════════════════════════════════════
+var _pendingImages=[];  // 등록 시 임시 저장
+var _editImages=[];     // 수정 시 기존 이미지 URL
+
+function handleImgSelect(files){
+  if(!files||!files.length)return;
+  var maxTotal=5;
+  var current=_pendingImages.length;
+  for(var i=0;i<files.length&&current<maxTotal;i++){
+    _pendingImages.push(files[i]);
+    current++;
+  }
+  renderImgThumbs('img-thumbs',_pendingImages);
+  if(current>=maxTotal)document.getElementById('img-upload-status').textContent='최대 5장까지 업로드 가능합니다.';
+}
+function handleEditImgSelect(files){
+  if(!files||!files.length)return;
+  var maxTotal=5;
+  var current=_editImages.length;
+  for(var i=0;i<files.length&&current<maxTotal;i++){
+    _editImages.push(files[i]);
+    current++;
+  }
+  renderImgThumbs('eimg-thumbs',_editImages);
+  if(current>=maxTotal)document.getElementById('eimg-upload-status').textContent='최대 5장까지 업로드 가능합니다.';
+}
+function renderImgThumbs(containerId,list){
+  var el=document.getElementById(containerId);
+  if(!el)return;
+  el.innerHTML='';
+  list.forEach(function(f,idx){
+    var wrap=document.createElement('div');wrap.className='img-thumb-wrap';
+    var img=document.createElement('img');img.className='img-thumb';
+    if(typeof f==='string'){img.src=f;}  // URL (기존 이미지)
+    else{var r=new FileReader();r.onload=function(e){img.src=e.target.result;};r.readAsDataURL(f);}  // File
+    wrap.appendChild(img);
+    var del=document.createElement('button');del.className='img-thumb-del';del.textContent='×';
+    (function(capturedIdx){
+      del.onclick=function(e){e.stopPropagation();list.splice(capturedIdx,1);renderImgThumbs(containerId,list);};
+    })(idx);
+    wrap.appendChild(del);
+    el.appendChild(wrap);
+  });
+}
+async function uploadImages(lid,fileList){
+  var urls=[];
+  for(var i=0;i<fileList.length;i++){
+    var f=fileList[i];
+    if(typeof f==='string'){urls.push(f);continue;}  // 이미 URL이면 스킵
+    var ref=storage.ref('listings/'+lid+'/'+Date.now()+'_'+i+'.jpg');
+    try{
+      var snap=await ref.put(f);
+      var url=await snap.ref.getDownloadURL();
+      urls.push(url);
+    }catch(e){console.error('이미지 업로드 실패:',e);}
+  }
+  return urls;
+}
+
+// 갤러리 렌더링
+function renderGallery(item){
+  var el=document.getElementById('dp-gallery');
+  if(!el)return;
+  var imgs=item.images||[];
+  if(!imgs.length){el.innerHTML='';return;}
+  var idx=0;
+  window._galImgs=imgs;window._galIdx=0;
+  el.innerHTML='<div class="img-gallery">'
+    +'<img src="'+imgs[idx]+'" alt="매물 사진">'
+    +(imgs.length>1?'<button class="img-nav prev" onclick="galleryNav(-1)">◀</button><button class="img-nav next" onclick="galleryNav(1)">▶</button>':'')
+    +'<div class="img-counter">1 / '+imgs.length+'</div>'
+    +'</div>';
+}
+function galleryNav(dir){
+  var imgs=window._galImgs||[];
+  if(!imgs.length)return;
+  window._galIdx=(window._galIdx+dir+imgs.length)%imgs.length;
+  var el=document.getElementById('dp-gallery');
+  if(!el)return;
+  var idx=window._galIdx;
+  el.innerHTML='<div class="img-gallery">'
+    +'<img src="'+imgs[idx]+'" alt="매물 사진">'
+    +(imgs.length>1?'<button class="img-nav prev" onclick="galleryNav(-1)">◀</button><button class="img-nav next" onclick="galleryNav(1)">▶</button>':'')
+    +'<div class="img-counter">'+(idx+1)+' / '+imgs.length+'</div>'
+    +'</div>';
+}
+
+// 드래그앤드롭
+document.addEventListener('DOMContentLoaded',function(){
+  ['img-upload-area','eimg-upload-area'].forEach(function(id){
+    var area=document.getElementById(id);
+    if(!area)return;
+    area.addEventListener('dragover',function(e){e.preventDefault();area.classList.add('dragover');});
+    area.addEventListener('dragleave',function(){area.classList.remove('dragover');});
+    area.addEventListener('drop',function(e){
+      e.preventDefault();area.classList.remove('dragover');
+      if(id==='img-upload-area')handleImgSelect(e.dataTransfer.files);
+      else handleEditImgSelect(e.dataTransfer.files);
+    });
+  });
+});
+
+// ════════════════════════════════════════════
+// 최근 본 매물
+// ════════════════════════════════════════════
+var _recentMax=10;
+function getRecentLids(){
+  try{return JSON.parse(localStorage.getItem('recentLids')||'[]');}catch(e){return [];}
+}
+function addRecent(lid){
+  var list=getRecentLids().filter(function(id){return id!==lid;});
+  list.unshift(lid);
+  if(list.length>_recentMax)list=list.slice(0,_recentMax);
+  try{localStorage.setItem('recentLids',JSON.stringify(list));}catch(e){}
+}
+function renderRecentList(){
+  var el=document.getElementById('sec-recent');
+  if(!el)return;
+  el.innerHTML='';
+  var lids=getRecentLids();
+  var all=buildAll();
+  var items=lids.map(function(lid){return all.find(function(i){return i.lid===lid;});}).filter(Boolean);
+  if(!items.length){
+    el.innerHTML='<div class="recent-empty"><div style="font-size:36px;opacity:.4">🕐</div><div style="font-weight:700">최근 본 매물이 없습니다</div><div style="font-size:12px;color:var(--text3);margin-top:4px">매물을 클릭하면 여기에 표시됩니다</div></div>';
+    return;
+  }
+  var h=document.createElement('div');h.style.cssText='padding:2px 2px 0;font-size:11px;color:var(--text2)';h.textContent='최근 본 매물 '+items.length+'건';el.appendChild(h);
+  items.forEach(function(item){
+    var c=document.createElement('div');
+    c.className='card'+(activeId===item.lid?' active':'');
+    var isRent=item.deal==='월세';
+    var isFav=favIds.includes(item.lid);
+    c.innerHTML=
+      '<button class="card-fav '+(isFav?'on':'')+'" onclick="event.stopPropagation();toggleFav(\''+item.lid+'\')">'+(isFav?'❤️':'🤍')+'</button>'
+      +(item.images&&item.images.length?'<div style="width:100%;height:80px;overflow:hidden;border-radius:8px;margin-bottom:6px"><img src="'+item.images[0]+'" style="width:100%;height:100%;object-fit:cover" loading="lazy"></div>':'')
+      +'<div class="ctop"><div style="display:flex;gap:4px"><span class="dtag '+pinClass(item)+'">'+combiLabel(item)+'</span></div>'
+      +'<span class="cprice">'+(isRent?'보'+wonShort(item.deposit)+'/월'+wonShort(item.monthly||0):wonShort(item.price))+'</span></div>'
+      +'<div class="cname">'+item.name+'</div>'
+      +'<div class="cmeta"><span>📍 '+(currentUser?fullAddr(item):maskAddr(item))+'</span><span>🚪 '+(item.rooms||'-')+'실</span></div>';
+    c.addEventListener('click',function(){
+      activeId=item.lid;activePopupItem=item;render();showPopup(item);
+      if(!kakaoMap)return;
+      var zoomLv=currentUser?4:5;
+      if(item.lat&&item.lng){kakaoMap.setLevel(zoomLv);kakaoMap.panTo(new kakao.maps.LatLng(item.lat,item.lng));}
+      else{getLatLng(item.prov,item.area,item.dong,function(lat,lng){if(!kakaoMap)return;kakaoMap.setLevel(zoomLv);kakaoMap.panTo(new kakao.maps.LatLng(lat,lng));},item.lid,item.jibun);}
+    });
+    el.appendChild(c);
+  });
+}
 </script>
 </body>
 </html>
