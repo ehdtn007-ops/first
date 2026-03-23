@@ -589,14 +589,31 @@ select:hover,select:focus{border-color:var(--accent)}
     <div class="modal-title">🔑 로그인</div>
     <div class="modal-sub">매물 등록은 로그인 후 이용 가능합니다</div>
     <div class="errmsg" id="login-err"></div>
-    <div class="fg"><label class="fl">아이디</label><input class="fi" id="li" placeholder="아이디 입력"></div>
+    <div class="fg"><label class="fl">아이디 또는 이메일</label><input class="fi" id="li" placeholder="아이디 또는 이메일 입력"></div>
     <div class="fg"><label class="fl">비밀번호</label><input class="fi" id="lp" type="password" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')doLogin()"></div>
     <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px;margin-top:-4px">
       <input type="checkbox" id="remember-id" style="width:15px;height:15px;cursor:pointer;accent-color:var(--accent)">
       <label for="remember-id" style="font-size:12px;color:var(--text2);cursor:pointer;user-select:none">아이디 기억하기</label>
     </div>
     <button class="btn btn-primary" onclick="doLogin()">로그인</button>
+    <div style="text-align:center;margin-top:8px"><a onclick="showResetPw()" style="font-size:12px;color:var(--text2);cursor:pointer;text-decoration:underline">비밀번호를 잊으셨나요?</a></div>
     <div class="fswitch">계정이 없으신가요? <a onclick="show('ov-reg')">회원가입 신청</a></div>
+  </div>
+</div>
+
+<!-- ═══ 비밀번호 찾기 모달 ═══ -->
+<div class="overlay hidden" id="ov-resetpw">
+  <div class="modal">
+    <button class="modal-close" onclick="closeAll()">✕</button>
+    <div class="modal-title">🔑 비밀번호 찾기</div>
+    <div class="modal-sub">가입 시 등록한 이메일로 비밀번호 재설정 링크를 보내드립니다</div>
+    <div class="errmsg" id="resetpw-err"></div>
+    <div class="sucmsg hidden" id="resetpw-ok">✅ 이메일이 발송되었습니다. 받은편지함을 확인해주세요.</div>
+    <div id="resetpw-form">
+      <div class="fg"><label class="fl">이메일</label><input class="fi" id="resetpw-email" type="email" placeholder="가입 시 등록한 이메일" onkeydown="if(event.key==='Enter')doResetPw()"></div>
+      <button class="btn btn-primary" onclick="doResetPw()">비밀번호 재설정 메일 보내기</button>
+    </div>
+    <div class="fswitch"><a onclick="show('ov-login')">로그인으로 돌아가기</a></div>
   </div>
 </div>
 
@@ -3062,6 +3079,54 @@ function closeAll(){document.querySelectorAll('.overlay').forEach(o=>o.classList
 function doLogin(){
   const id=document.getElementById('li').value.trim(),pw=document.getElementById('lp').value;
   const err=document.getElementById('login-err');
+  err.classList.remove('show');
+
+  // 이메일 형식이면 Firebase Auth로 마스터 로그인 시도
+  if(id.includes('@')){
+    auth.signInWithEmailAndPassword(id, pw).then(function(cred){
+      // Firebase Auth 마스터 로그인 성공
+      var masterUser = users.find(u=>u.role==='master');
+      if(masterUser){
+        masterUser.email = id;
+        masterUser.firebaseUid = cred.user.uid;
+        currentUser = masterUser;
+      } else {
+        currentUser = {id:'master',name:'마스터관리자',phone:'02-0000-0000',license:'',role:'master',status:'active',listings:[],email:id,firebaseUid:cred.user.uid};
+        users.unshift(currentUser);
+      }
+      // 아이디 기억하기
+      var remember=document.getElementById('remember-id').checked;
+      try{
+        if(remember){localStorage.setItem('savedId',id);localStorage.setItem('rememberIdChecked','1');}
+        else{localStorage.removeItem('savedId');localStorage.removeItem('rememberIdChecked');}
+      }catch(e){}
+      closeAll();
+      document.getElementById('lp').value='';
+      if(!remember)document.getElementById('li').value='';
+      // 좌표 캐시 초기화
+      Object.keys(_geoExact).forEach(k=>delete _geoExact[k]);
+      Object.keys(_geoOffset).forEach(k=>delete _geoOffset[k]);
+      Object.keys(_geoBase).forEach(k=>delete _geoBase[k]);
+      overlays.forEach(o=>o.setMap(null)); overlays=[];
+      renderHeader();
+      render();
+      if(geocoderObj){_tryPrefetch();}
+      if(currentView==='board')renderBoard();
+      checkAutoBackup();
+    }).catch(function(e){
+      if(e.code==='auth/user-not-found'||e.code==='auth/wrong-password'||e.code==='auth/invalid-credential'){
+        err.textContent='이메일 또는 비밀번호가 틀렸습니다.';
+      } else if(e.code==='auth/too-many-requests'){
+        err.textContent='로그인 시도가 너무 많습니다. 잠시 후 다시 시도해주세요.';
+      } else {
+        err.textContent='로그인 실패: '+e.message;
+      }
+      err.classList.add('show');
+    });
+    return;
+  }
+
+  // 기존 ID/PW 로그인 (일반 회원)
   const u=users.find(u=>u.id===id&&u.pw===pw);
   if(!u){err.textContent='아이디 또는 비밀번호가 틀렸습니다.';err.classList.add('show');return;}
   if(u.status==='blocked'){err.textContent='차단된 계정입니다. 관리자에게 문의하세요.';err.classList.add('show');return;}
@@ -3072,21 +3137,16 @@ function doLogin(){
     else{localStorage.removeItem('savedId');localStorage.removeItem('rememberIdChecked');}
   }catch(e){}
   currentUser=u;closeAll();err.classList.remove('show');
-  // 세션 저장 (새로고침 후 자동 로그인 유지)
   try{var _st=btoa(u.id+':'+u.pw+':'+Date.now());localStorage.setItem('sessionToken',_st);localStorage.removeItem('sessionUserId');localStorage.removeItem('sessionUserPw');}catch(e){}
   document.getElementById('lp').value='';
   if(!remember)document.getElementById('li').value='';
-  // 로그인 시 좌표 캐시 전체 초기화
   Object.keys(_geoExact).forEach(k=>delete _geoExact[k]);
   Object.keys(_geoOffset).forEach(k=>delete _geoOffset[k]);
   Object.keys(_geoBase).forEach(k=>delete _geoBase[k]);
   overlays.forEach(o=>o.setMap(null)); overlays=[];
   renderHeader();
-  render(); // 목록 먼저 표시
-  // 좌표 prefetch 완료 후 핀 정확하게 다시 그리기
-  if(geocoderObj){
-    _tryPrefetch();
-  }
+  render();
+  if(geocoderObj){_tryPrefetch();}
   if(currentView==='board')renderBoard();
   checkAutoBackup();
   if(u.status==='pending'){
@@ -3094,6 +3154,7 @@ function doLogin(){
   }
 }
 function doLogout(){
+  auth.signOut().catch(function(){});
   currentUser=null;
   try{localStorage.removeItem('sessionToken');localStorage.removeItem('sessionUserId');localStorage.removeItem('sessionUserPw');}catch(e){}
   // 로그아웃 시 좌표 캐시 초기화 → 동 단위 랜덤으로 핀 재배치
@@ -3106,6 +3167,22 @@ function doLogout(){
   renderHeader();
   render();
   if(currentView==='board')renderBoard();
+}
+function showResetPw(){closeAll();show('ov-resetpw');}
+function doResetPw(){
+  var email=document.getElementById('resetpw-email').value.trim();
+  var err=document.getElementById('resetpw-err');
+  var ok=document.getElementById('resetpw-ok');
+  err.classList.remove('show');ok.classList.add('hidden');
+  if(!email||!email.includes('@')){err.textContent='올바른 이메일을 입력해주세요.';err.classList.add('show');return;}
+  auth.sendPasswordResetEmail(email).then(function(){
+    document.getElementById('resetpw-form').style.display='none';
+    ok.classList.remove('hidden');
+  }).catch(function(e){
+    if(e.code==='auth/user-not-found'){err.textContent='등록되지 않은 이메일입니다.';}
+    else{err.textContent='발송 실패: '+e.message;}
+    err.classList.add('show');
+  });
 }
 // 저장된 아이디 복원
 try{
@@ -5638,7 +5715,11 @@ function renderProfilePanel(){
           <label style="font-size:12px;color:var(--text2);font-weight:600">전화번호</label>
           <input id="pf-phone" class="fi" value="${u.phone||''}" placeholder="전화번호" style="width:100%;margin-top:4px">
         </div>
-        ${u.role==='master'||u.role==='admin'?'':''}      </div>
+        ${u.role==='master'?`<div>
+          <label style="font-size:12px;color:var(--text2);font-weight:600">이메일 (로그인/비밀번호 찾기용)</label>
+          <input id="pf-email" class="fi" value="${u.email||''}" placeholder="이메일" style="width:100%;margin-top:4px">
+        </div>`:''}
+      </div>
       <button class="btn btn-primary" onclick="saveProfileInfo()" style="margin-top:14px;width:100%">💾 기본 정보 저장</button>
       <div id="pf-info-msg" style="font-size:12px;margin-top:8px;text-align:center"></div>
     </div>
@@ -5689,6 +5770,21 @@ function saveProfileInfo(){
   // users 배열 동기화
   const uIdx=users.findIndex(u=>u.id===currentUser.id);
   if(uIdx>=0){users[uIdx].name=name;users[uIdx].phone=phone;}
+  // 마스터 이메일 변경
+  if(currentUser.role==='master'){
+    var newEmail=document.getElementById('pf-email');
+    if(newEmail&&newEmail.value.trim()&&newEmail.value.trim()!==currentUser.email){
+      var emailVal=newEmail.value.trim();
+      if(auth.currentUser){
+        auth.currentUser.updateEmail(emailVal).then(function(){
+          currentUser.email=emailVal;
+          msg.style.color='var(--green)';msg.textContent='✅ 이메일도 변경됐습니다!';
+        }).catch(function(e){
+          msg.style.color='var(--red)';msg.textContent='이메일 변경 실패: '+e.message;
+        });
+      }
+    }
+  }
   db.collection('users').doc(currentUser.id).set(currentUser).then(()=>{
     msg.style.color='var(--green)';msg.textContent='✅ 저장됐습니다!';
     setTimeout(()=>{msg.textContent='';},2500);
@@ -5701,11 +5797,29 @@ function saveProfilePw(){
   const nw2=document.getElementById('pf-pw-new2').value;
   const msg=document.getElementById('pf-pw-msg');
   if(!cur||!nw||!nw2){msg.style.color='var(--red)';msg.textContent='모든 항목을 입력해주세요.';return;}
-  if(cur!==currentUser.pw){msg.style.color='var(--red)';msg.textContent='현재 비밀번호가 틀렸습니다.';return;}
   if(nw.length<6){msg.style.color='var(--red)';msg.textContent='새 비밀번호는 6자 이상이어야 합니다.';return;}
   if(nw!==nw2){msg.style.color='var(--red)';msg.textContent='새 비밀번호가 일치하지 않습니다.';return;}
+  if(currentUser.role==='master'&&auth.currentUser){
+    var credential=firebase.auth.EmailAuthProvider.credential(auth.currentUser.email,cur);
+    auth.currentUser.reauthenticateWithCredential(credential).then(function(){
+      return auth.currentUser.updatePassword(nw);
+    }).then(function(){
+      msg.style.color='var(--green)';msg.textContent='✅ 비밀번호가 변경됐습니다!';
+      document.getElementById('pf-pw-cur').value='';
+      document.getElementById('pf-pw-new').value='';
+      document.getElementById('pf-pw-new2').value='';
+      setTimeout(function(){msg.textContent='';},2500);
+    }).catch(function(e){
+      if(e.code==='auth/wrong-password'||e.code==='auth/invalid-credential'){
+        msg.style.color='var(--red)';msg.textContent='현재 비밀번호가 틀렸습니다.';
+      } else {
+        msg.style.color='var(--red)';msg.textContent='변경 실패: '+e.message;
+      }
+    });
+    return;
+  }
+  if(cur!==currentUser.pw){msg.style.color='var(--red)';msg.textContent='현재 비밀번호가 틀렸습니다.';return;}
   currentUser.pw=nw;
-  // users 배열 동기화
   const uPwIdx=users.findIndex(u=>u.id===currentUser.id);
   if(uPwIdx>=0)users[uPwIdx].pw=nw;
   try{var _st4=btoa(currentUser.id+':'+nw+':'+Date.now());localStorage.setItem('sessionToken',_st4);localStorage.removeItem('sessionUserPw');}catch(_e){}
@@ -5799,7 +5913,7 @@ async function loadFromFirebase(){
     }
 
     // 1. 마스터 계정 항상 포함
-    users = [{id:'master',pw:'master123',name:'마스터관리자',phone:'02-0000-0000',license:'',role:'master',status:'active',listings:[]}];
+    users = [{id:'master',name:'마스터관리자',phone:'02-0000-0000',license:'',role:'master',status:'active',listings:[]}];
 
     // 2. Firestore에서 users 로드
     const usersSnap = await db.collection('users').get();
@@ -5847,7 +5961,7 @@ async function loadFromFirebase(){
     BASE_DATA = SEED_DATA.map(item=>({...item}));
     BASE = BASE_DATA;
     users = [
-      {id:'master',pw:'master123',name:'마스터관리자',phone:'02-0000-0000',license:'',role:'master',status:'active',listings:[]},
+      {id:'master',name:'마스터관리자',phone:'02-0000-0000',license:'',role:'master',status:'active',listings:[]},
     ];
   }
   // ── 세션 복원: 새로고침 후 자동 로그인 ──
@@ -5872,6 +5986,16 @@ async function loadFromFirebase(){
       }
     }
   }catch(e){localStorage.removeItem('sessionToken');}
+  // ── Firebase Auth 세션 복원 (마스터) ──
+  if(!currentUser && auth.currentUser){
+    var masterUser=users.find(u=>u.role==='master');
+    if(masterUser){
+      masterUser.email=auth.currentUser.email;
+      masterUser.firebaseUid=auth.currentUser.uid;
+      currentUser=masterUser;
+      renderHeader();
+    }
+  }
   // Gemini API 키 로드
   await loadGeminiKey();
   // 데이터 로드 완료 → 좌표 캐시 초기화
