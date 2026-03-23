@@ -5223,40 +5223,46 @@ function copyShareUrl(){
   } else { _fbCopy(url,ok); }
 }
 // URL 파라미터로 매물 자동 오픈 (loadFromFirebase 완료 후 호출됨)
+var _urlLidDone=false;
 function checkUrlLid(){
+  if(_urlLidDone)return;
   try{
     const params=new URLSearchParams(location.search);
     const lid=params.get('lid');
     if(!lid)return;
+    // Firebase 데이터 로드 전이면 스킵 (loadFromFirebase 완료 후 다시 호출됨)
+    if(!_firebaseReady)return;
     const item=buildAll().find(i=>i.lid===lid);
-    if(item){
-      // 지도 준비될 때까지 대기 후 이동
-      var _urlTry=0;
-      var _urlWait=setInterval(()=>{
-        _urlTry++;
-        if(!kakaoMap && _urlTry<20)return; // 최대 4초 대기
-        clearInterval(_urlWait);
-        activeId=lid;activePopupItem=item;render();showPopup(item);
-        if(kakaoMap){
-          const zoomLv=currentUser?4:5;
-          if(item.lat&&item.lng){
-            kakaoMap.setLevel(zoomLv);kakaoMap.panTo(new kakao.maps.LatLng(item.lat,item.lng));
-          } else {
-            getLatLng(item.prov,item.area,item.dong,(lat,lng)=>{
-              if(!kakaoMap)return;
-              kakaoMap.setLevel(zoomLv);kakaoMap.panTo(new kakao.maps.LatLng(lat,lng));
-            },item.lid,item.jibun);
-          }
-          // 핀 렌더링 완료 후 다시 이동 (좌표 프리패치 완료 대비)
-          setTimeout(()=>{
-            if(kakaoMap&&item.lat&&item.lng){
-              kakaoMap.setLevel(zoomLv);kakaoMap.panTo(new kakao.maps.LatLng(item.lat,item.lng));
-            }
-          },2000);
-        }
+    if(!item)return;
+    _urlLidDone=true;
+    activeId=lid;activePopupItem=item;render();showPopup(item);
+    function _moveToItem(){
+      if(!kakaoMap)return;
+      const zoomLv=currentUser?4:5;
+      if(item.lat&&item.lng){
+        kakaoMap.setLevel(zoomLv);kakaoMap.panTo(new kakao.maps.LatLng(item.lat,item.lng));
+      } else {
+        getLatLng(item.prov,item.area,item.dong,(lat,lng)=>{
+          if(!kakaoMap)return;
+          kakaoMap.setLevel(zoomLv);kakaoMap.panTo(new kakao.maps.LatLng(lat,lng));
+        },item.lid,item.jibun);
+      }
+    }
+    if(kakaoMap){
+      _moveToItem();
+      setTimeout(_moveToItem,2000);
+    } else {
+      // 카카오맵 아직 안 됨 → 대기
+      var _mTry=0;
+      var _mWait=setInterval(()=>{
+        _mTry++;
+        if(!kakaoMap&&_mTry<50)return; // 최대 10초
+        clearInterval(_mWait);
+        _moveToItem();
+        setTimeout(_moveToItem,2000);
       },200);
     }
-  }catch(e){}
+  }catch(e){console.error('checkUrlLid 오류:',e);}
 }
 
 // ════════════════════════════════════════════
@@ -5695,6 +5701,7 @@ if(typeof kakao !== 'undefined'){
       _kakaoReady=true;
       console.log('[kakao] geocoder 준비 완료');
       _tryPrefetch();
+      checkUrlLid();
     }
     catch(e){console.warn('카카오맵 초기화 실패:',e);}
   });
