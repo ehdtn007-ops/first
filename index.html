@@ -401,8 +401,8 @@ select:hover,select:focus{border-color:var(--accent)}
 .pending-notice{margin:0 10px 4px;padding:10px 13px;background:rgba(245,197,24,.08);border:1px solid rgba(245,197,24,.25);border-radius:10px;font-size:12px;color:var(--yellow);line-height:1.6}
 
 /* ═══ 관리자 ═══ */
-.atabs{display:flex;gap:3px;margin-bottom:18px;border-bottom:1px solid var(--border)}
-.atab{padding:7px 15px;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;border-radius:8px 8px 0 0;border:1px solid transparent;border-bottom:none;transition:all .15s;margin-bottom:-1px}
+.atabs{display:flex;gap:3px;margin-bottom:18px;border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.atab{padding:7px 15px;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;border-radius:8px 8px 0 0;border:1px solid transparent;border-bottom:none;transition:all .15s;margin-bottom:-1px;white-space:nowrap;flex-shrink:0;}
 .atab.active{background:var(--surface2);color:var(--text);border-color:var(--border)}
 .asec{display:none}.asec.active{display:block}
 .atable{width:100%;border-collapse:collapse;font-size:12px}
@@ -488,6 +488,8 @@ select:hover,select:focus{border-color:var(--accent)}
   .panel-section{padding:5px;gap:5px}
   .panel-section > div:first-child{font-size:10px}
   .card-fav{font-size:11px;top:7px;right:7px}
+  .atabs{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .atab{white-space:nowrap;flex-shrink:0;padding:7px 10px;font-size:11px;}
 }
 @media(max-width:400px){
   #map-wrap{height:40vh}
@@ -3914,7 +3916,7 @@ function renderAListings(){
         <th style="width:130px">위치</th>
         <th style="width:120px">가격</th>
         <th style="width:60px">등록일</th>
-        <th style="width:160px">관리</th>
+        <th style="width:200px">관리</th>
         <th style="width:40px"></th>
       </tr>
     </thead>
@@ -3938,13 +3940,15 @@ function renderAListings(){
         <td style="color:var(--text2);font-size:11px">${fullAddr(item)}</td>
         <td style="font-size:11px">${fmtPrice(item)}</td>
         <td style="font-size:11px;color:var(--text2)">${regDate}</td>
-        <td style="display:flex;gap:4px;flex-wrap:wrap">
-          <button class="btn btn-sm" style="background:var(--accent);color:#fff" onclick="openEditListingAdmin('${item.ownerId||''}','${item.lid}')">✏️수정</button>
-          <button class="btn btn-sm" style="background:#ffb300;color:#191919;font-weight:700" onclick="refreshRegisteredAt('${item.ownerId||''}','${item.lid}',this)" title="오늘 날짜로 등록일 갱신">📅오늘</button>
-          <button class="btn btn-sm" style="background:rgba(168,85,247,.18);color:#c084fc;border:1px solid rgba(168,85,247,.3)" onclick="archiveListing('${item.ownerId||''}','${item.lid}')">📦거래완료매물</button>
-          ${item.ownerId
-            ?`<button class="btn btn-sm btn-red" onclick="delListing('${item.ownerId}','${item.lid}')">삭제</button>`
-            :`<button class="btn btn-sm btn-red" onclick="delBaseListing('${item.lid}')">삭제</button>`}
+        <td>
+          <div style="display:flex;flex-direction:row;align-items:center;gap:4px;flex-wrap:nowrap">
+            <button class="btn btn-sm" style="background:var(--accent);color:#fff;white-space:nowrap" onclick="openEditListingAdmin('${item.ownerId||''}','${item.lid}')">✏️수정</button>
+            <button class="btn btn-sm" style="background:#ffb300;color:#191919;font-weight:700;white-space:nowrap" onclick="refreshRegisteredAt('${item.ownerId||''}','${item.lid}',this)" title="오늘 날짜로 등록일 갱신">📅오늘</button>
+            <button class="btn btn-sm" style="background:rgba(168,85,247,.18);color:#c084fc;border:1px solid rgba(168,85,247,.3);white-space:nowrap;font-size:10px;padding:4px 6px" onclick="archiveListing('${item.ownerId||''}','${item.lid}')">📦거래완료</button>
+            ${item.ownerId
+              ?`<button class="btn btn-sm btn-red" style="white-space:nowrap" onclick="delListing('${item.ownerId}','${item.lid}')">삭제</button>`
+              :`<button class="btn btn-sm btn-red" style="white-space:nowrap" onclick="delBaseListing('${item.lid}')">삭제</button>`}
+          </div>
         </td>
         <td style="text-align:center"><input type="checkbox" class="row-chk" data-lid="${item.lid}" data-owner="${item.ownerId||''}" style="cursor:pointer;width:14px;height:14px"></td>
       </tr>`;
