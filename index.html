@@ -3916,7 +3916,7 @@ function renderAListings(){
         <th style="width:130px">위치</th>
         <th style="width:120px">가격</th>
         <th style="width:60px">등록일</th>
-        <th style="width:200px">관리</th>
+        <th style="width:140px">관리</th>
         <th style="width:40px"></th>
       </tr>
     </thead>
@@ -3941,13 +3941,13 @@ function renderAListings(){
         <td style="font-size:11px">${fmtPrice(item)}</td>
         <td style="font-size:11px;color:var(--text2)">${regDate}</td>
         <td>
-          <div style="display:flex;flex-direction:row;align-items:center;gap:4px;flex-wrap:nowrap">
-            <button class="btn btn-sm" style="background:var(--accent);color:#fff;white-space:nowrap" onclick="openEditListingAdmin('${item.ownerId||''}','${item.lid}')">✏️수정</button>
-            <button class="btn btn-sm" style="background:#ffb300;color:#191919;font-weight:700;white-space:nowrap" onclick="refreshRegisteredAt('${item.ownerId||''}','${item.lid}',this)" title="오늘 날짜로 등록일 갱신">📅오늘</button>
-            <button class="btn btn-sm" style="background:rgba(168,85,247,.18);color:#c084fc;border:1px solid rgba(168,85,247,.3);white-space:nowrap;font-size:10px;padding:4px 6px" onclick="archiveListing('${item.ownerId||''}','${item.lid}')">📦거래완료</button>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;width:130px">
+            <button class="btn btn-sm" style="background:var(--accent);color:#fff;white-space:nowrap;font-size:10px;padding:3px 4px" onclick="openEditListingAdmin('${item.ownerId||''}','${item.lid}')">✏️수정</button>
+            <button class="btn btn-sm" style="background:#ffb300;color:#191919;font-weight:700;white-space:nowrap;font-size:10px;padding:3px 4px" onclick="refreshRegisteredAt('${item.ownerId||''}','${item.lid}',this)" title="오늘 날짜로 등록일 갱신">📅오늘</button>
+            <button class="btn btn-sm" style="background:rgba(168,85,247,.18);color:#c084fc;border:1px solid rgba(168,85,247,.3);white-space:nowrap;font-size:10px;padding:3px 4px" onclick="archiveListing('${item.ownerId||''}','${item.lid}')">📦거래완료</button>
             ${item.ownerId
-              ?`<button class="btn btn-sm btn-red" style="white-space:nowrap" onclick="delListing('${item.ownerId}','${item.lid}')">삭제</button>`
-              :`<button class="btn btn-sm btn-red" style="white-space:nowrap" onclick="delBaseListing('${item.lid}')">삭제</button>`}
+              ?`<button class="btn btn-sm btn-red" style="white-space:nowrap;font-size:10px;padding:3px 4px" onclick="delListing('${item.ownerId}','${item.lid}')">삭제</button>`
+              :`<button class="btn btn-sm btn-red" style="white-space:nowrap;font-size:10px;padding:3px 4px" onclick="delBaseListing('${item.lid}')">삭제</button>`}
           </div>
         </td>
         <td style="text-align:center"><input type="checkbox" class="row-chk" data-lid="${item.lid}" data-owner="${item.ownerId||''}" style="cursor:pointer;width:14px;height:14px"></td>
