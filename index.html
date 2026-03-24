@@ -488,8 +488,72 @@ select:hover,select:focus{border-color:var(--accent)}
   .panel-section{padding:5px;gap:5px}
   .panel-section > div:first-child{font-size:10px}
   .card-fav{font-size:11px;top:7px;right:7px}
-  .atabs{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-  .atab{white-space:nowrap;flex-shrink:0;padding:7px 10px;font-size:11px;}
+  /* ── Issue 1: Admin tab bar – wrap to 2 rows on mobile ── */
+  .atabs{
+    flex-wrap:wrap;
+    overflow-x:visible;
+    gap:4px;
+    padding-bottom:6px;
+  }
+  .atab{
+    white-space:nowrap;
+    flex-shrink:0;
+    padding:5px 8px;
+    font-size:10px;
+  }
+
+  /* ── Issue 4: Admin modal full-screen + inner scroll ── */
+  #ov-admin .modal-xl{
+    width:100vw!important;
+    max-width:100vw!important;
+    height:100dvh;
+    max-height:100dvh!important;
+    border-radius:0;
+    padding:16px 12px 12px;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+  }
+  #ov-admin .modal-xl > .atabs{
+    flex-shrink:0;
+  }
+  #ov-admin .modal-xl > .asec{
+    flex:1;
+    overflow-y:auto;
+    min-height:0;
+  }
+
+  /* ── Issue 2: Listing filter dropdowns – styled for smaller viewports ── */
+  /* Filters live inside thead th cells; table scrolls horizontally so all
+     columns (including filter selects) remain reachable via scroll.
+     Make the select elements compact so the filter cells take less width. */
+  #as-listings .atable thead select,
+  #as-archived .atable thead select{
+    min-width:60px;
+    max-width:90px;
+    font-size:10px;
+    padding:2px 4px;
+  }
+
+  /* ── Issue 3 & 5: Tables – scrollable containers, reduced min-width ── */
+  #as-listings .atable,
+  #as-archived .atable,
+  #as-bldgbulk .atable,
+  #as-members .atable{
+    min-width:600px!important;
+    font-size:11px;
+  }
+  /* Ensure the overflow wrapper is present and works */
+  #as-listings > div[style*="overflow-x:auto"],
+  #as-archived > div[style*="overflow-x:auto"]{
+    -webkit-overflow-scrolling:touch;
+  }
+  /* Shrink the 관리 button grid on mobile */
+  #as-listings .atable td > div[style*="grid-template-columns:1fr 1fr"]{
+    width:auto!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:3px!important;
+  }
 }
 @media(max-width:400px){
   #map-wrap{height:40vh}
