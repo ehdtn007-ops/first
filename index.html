@@ -3470,10 +3470,8 @@ function renderMyListings(){
 
   // 필터 값 읽기
   const fType2=document.getElementById('myf-type')?.value||'전체';
-  const fDeal2=document.getElementById('myf-deal')?.value||'전체';
   const filtered2=myItems.filter(item=>{
-    if(fType2!=='전체'&&item.type!==fType2)return false;
-    if(fDeal2!=='전체'&&item.deal!==fDeal2)return false;
+    if(fType2!=='전체'&&combiLabel(item)!==fType2)return false;
     return true;
   });
 
@@ -3511,7 +3509,6 @@ function renderMyListings(){
         </td>
         <td style="font-size:12px;font-weight:700;text-align:center;color:var(--text)">${item.no||''}</td>
         <td><span class="dtag ${pinClass(item)}" style="font-size:10px">${combiLabel(item)}</span></td>
-        <td style="font-size:11px;color:var(--text2)">${item.deal||''}</td>
         <td>
           <div style="font-weight:600;font-size:12px">${item.name}</div>
           ${item.memo?`<div style="margin-top:3px;padding:3px 7px;background:rgba(251,191,36,.08);border-left:2px solid rgba(251,191,36,.5);border-radius:0 6px 6px 0;font-size:10px;color:#fbbf24;line-height:1.4;white-space:pre-wrap;word-break:break-all">🔒 ${item.memo}</div>`:''}
@@ -3534,8 +3531,7 @@ function renderMyListings(){
     <thead><tr>
       <th style="width:70px">노출</th>
       <th style="width:45px;text-align:center">번호</th>
-      <th style="width:80px"><select id="myf-type" style="${mySelStyle}" onchange="renderMyListings()">${['종류','고시원','모텔'].map(v=>`<option value="${v==='종류'?'전체':v}"${(v==='종류'?'전체':v)===fType2?' selected':''}>${v}</option>`).join('')}</select></th>
-      <th style="width:80px"><select id="myf-deal" style="${mySelStyle}" onchange="renderMyListings()">${['거래','매매','월세'].map(v=>`<option value="${v==='거래'?'전체':v}"${(v==='거래'?'전체':v)===fDeal2?' selected':''}>${v==='월세'?'임대':v}</option>`).join('')}</select></th>
+      <th style="width:90px"><select id="myf-type" style="${mySelStyle}" onchange="renderMyListings()">${['종류','고시원임대','고시원매매','모텔임대','모텔매매'].map(v=>`<option value="${v==='종류'?'전체':v}"${(v==='종류'?'전체':v)===fType2?' selected':''}>${v}</option>`).join('')}</select></th>
       <th style="min-width:150px">매물명</th>
       <th>위치</th>
       <th style="width:170px;white-space:nowrap">가격</th>
@@ -3995,11 +3991,9 @@ function renderAListings(){
   // 현재 필터 값 읽기
   const fOwner=document.getElementById('alf-owner')?.value||'전체';
   const fType =document.getElementById('alf-type')?.value||'전체';
-  const fDeal =document.getElementById('alf-deal')?.value||'전체';
   const filtered=all.filter(item=>{
     if(fOwner!=='전체'&&(item.ownerName||'마스터')!==fOwner)return false;
-    if(fType!=='전체'&&item.type!==fType)return false;
-    if(fDeal!=='전체'&&item.deal!==fDeal)return false;
+    if(fType!=='전체'&&combiLabel(item)!==fType)return false;
     return true;
   });
 
@@ -4036,14 +4030,9 @@ function renderAListings(){
             ${ownerNames.map(n=>`<option${n===fOwner?' selected':''}>` + `${n}</option>`).join('')}
           </select>
         </th>
-        <th style="width:75px;white-space:nowrap">
+        <th style="width:90px;white-space:nowrap">
           <select id="alf-type" style="${selStyle}" onchange="renderAListings()">
-            ${['종류','고시원','모텔'].map(v=>`<option value="${v==='종류'?'전체':v}"${(v==='종류'?'전체':v)===fType?' selected':''}>${v}</option>`).join('')}
-          </select>
-        </th>
-        <th style="width:80px;white-space:nowrap">
-          <select id="alf-deal" style="${selStyle}" onchange="renderAListings()">
-            ${['거래','매매','월세'].map(v=>`<option value="${v==='거래'?'전체':v}"${(v==='거래'?'전체':v)===fDeal?' selected':''}>${v==='월세'?'임대':v}</option>`).join('')}
+            ${['종류','고시원임대','고시원매매','모텔임대','모텔매매'].map(v=>`<option value="${v==='종류'?'전체':v}"${(v==='종류'?'전체':v)===fType?' selected':''}>${v}</option>`).join('')}
           </select>
         </th>
         <th style="min-width:150px;white-space:nowrap">매물명</th>
@@ -4068,7 +4057,6 @@ function renderAListings(){
         <td style="font-size:12px;font-weight:700;text-align:center;color:var(--text)">${item.no||''}</td>
         <td style="font-size:11px;font-weight:700;color:var(--accent)">${item.ownerName||'기본'}</td>
         <td><span class="dtag ${pinClass(item)}" style="font-size:10px">${combiLabel(item)}</span></td>
-        <td style="font-size:11px;color:var(--text2)">${item.deal||''}</td>
         <td>
           <div style="font-weight:600;font-size:12px">${item.name}</div>
           ${item.memo?`<div style="margin-top:4px;padding:4px 8px;background:rgba(251,191,36,.08);border-left:2px solid rgba(251,191,36,.5);border-radius:0 6px 6px 0;font-size:10px;color:#fbbf24;line-height:1.5;white-space:pre-wrap;word-break:break-all">🔒 ${item.memo}</div>`:''}
@@ -4628,10 +4616,8 @@ function renderAArchived(){
   }
   const sorted=[...archivedListings].sort((a,b)=>(b.archivedAt||0)-(a.archivedAt||0));
   const afType=document.getElementById('arf-type')?.value||'전체';
-  const afDeal=document.getElementById('arf-deal')?.value||'전체';
   const afFiltered=sorted.filter(item=>{
-    if(afType!=='전체'&&item.type!==afType)return false;
-    if(afDeal!=='전체'&&item.deal!==afDeal)return false;
+    if(afType!=='전체'&&combiLabel(item)!==afType)return false;
     return true;
   });
   const arSelStyle=`background:var(--surface3);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:3px 6px;font-size:11px;font-family:inherit;cursor:pointer;outline:none;width:100%;margin-top:4px`;
@@ -4645,8 +4631,7 @@ function renderAArchived(){
     <thead><tr>
       <th style="width:45px;text-align:center">번호</th>
       <th>담당자</th>
-      <th style="width:80px"><select id="arf-type" style="${arSelStyle}" onchange="renderAArchived()">${['종류','고시원','모텔'].map(v=>`<option value="${v==='종류'?'전체':v}"${(v==='종류'?'전체':v)===afType?' selected':''}>${v}</option>`).join('')}</select></th>
-      <th style="width:80px"><select id="arf-deal" style="${arSelStyle}" onchange="renderAArchived()">${['거래','매매','월세'].map(v=>`<option value="${v==='거래'?'전체':v}"${(v==='거래'?'전체':v)===afDeal?' selected':''}>${v==='월세'?'임대':v}</option>`).join('')}</select></th>
+      <th style="width:90px"><select id="arf-type" style="${arSelStyle}" onchange="renderAArchived()">${['종류','고시원임대','고시원매매','모텔임대','모텔매매'].map(v=>`<option value="${v==='종류'?'전체':v}"${(v==='종류'?'전체':v)===afType?' selected':''}>${v}</option>`).join('')}</select></th>
       <th style="min-width:150px">매물명</th>
       <th>위치</th>
       <th style="width:170px;white-space:nowrap">가격</th>
@@ -4659,7 +4644,6 @@ function renderAArchived(){
         <td style="font-size:12px;font-weight:700;text-align:center;color:var(--text)">${item.no||''}</td>
         <td style="font-size:11px;font-weight:700;color:var(--purple)">${item.ownerName||'기본'}</td>
         <td><span class="dtag ${pinClass(item)}" style="font-size:10px">${combiLabel(item)}</span></td>
-        <td style="font-size:11px;color:var(--text2)">${item.deal||''}</td>
         <td style="font-weight:600;font-size:12px">${item.name}</td>
         <td style="color:var(--text2);font-size:11px">${fullAddr(item)}</td>
         <td style="font-size:11px;white-space:nowrap">${fmtPrice(item)}${item.deal==='월세'?`<div style="color:#3ecf8e;font-size:10px;margin-top:2px;font-weight:600">합 ${won((item.deposit||0)+(item.keymoney||0))}</div>`:''}</td>
