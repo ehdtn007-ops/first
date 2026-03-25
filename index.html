@@ -380,6 +380,12 @@ select:hover,select:focus{border-color:var(--accent)}
 .card.active{border-color:var(--accent);background:#1e2540;box-shadow:0 0 0 1px var(--accent)}
 .ctop{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:7px;padding-right:26px}
 .dtag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;white-space:nowrap}
+.type-filter-btn{background:var(--surface3);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:3px 6px;font-size:11px;font-family:inherit;cursor:pointer;outline:none;width:100%;text-align:left;white-space:nowrap}
+.type-filter-btn:hover{border-color:var(--accent)}
+.type-filter-dd{display:none;position:absolute;top:100%;left:0;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:6px 0;z-index:100;min-width:120px;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.type-filter-dd label{display:flex;align-items:center;gap:6px;padding:4px 10px;font-size:11px;color:var(--text);cursor:pointer;white-space:nowrap}
+.type-filter-dd label:hover{background:var(--surface3)}
+.type-filter-dd input[type=checkbox]{width:14px;height:14px;cursor:pointer}
 .dtag.매매{background:rgba(79,140,255,.18);color:var(--accent)}
 .dtag.월세{background:rgba(62,207,142,.15);color:var(--green)}
 .dtag.고시원{background:rgba(168,85,247,.15);color:#c084fc}
@@ -1984,6 +1990,12 @@ function pinClass(item){
   if(item.type==='고시원')return item.deal==='월세'?'gs-r':'gs';
   return item.deal==='월세'?'mt-r':'mt';
 }
+let myTypeChecked=[];
+let aTypeChecked=[];
+let arTypeChecked=[];
+function toggleTypeDD(id){const dd=document.getElementById(id);if(!dd)return;dd.style.display=dd.style.display==='none'?'block':'none';}
+function onTypeCheck(prefix,renderFn){const checks=document.querySelectorAll('#'+prefix+'-type-dd input[type=checkbox]:checked');const vals=Array.from(checks).map(c=>c.value);if(prefix==='myf')myTypeChecked=vals;else if(prefix==='alf')aTypeChecked=vals;else if(prefix==='arf')arTypeChecked=vals;if(typeof window[renderFn]==='function')window[renderFn]();}
+document.addEventListener('click',function(e){if(!e.target.closest('.type-filter-dd')&&!e.target.classList.contains('type-filter-btn')){document.querySelectorAll('.type-filter-dd').forEach(dd=>{dd.style.display='none';});}});
 function combiLabel(item){
   const d=item.deal==='월세'?'임대':'매매';
   return item.type+d;
@@ -3469,9 +3481,10 @@ function renderMyListings(){
   const myItems=(u&&u.listings)?u.listings:[];
 
   // 필터 값 읽기
-  const fType2=document.getElementById('myf-type')?.value||'전체';
+  const myDDOpen=document.getElementById('myf-type-dd')?.style.display==='block';
+  const fType2=myTypeChecked;
   const filtered2=myItems.filter(item=>{
-    if(fType2!=='전체'&&combiLabel(item)!==fType2)return false;
+    if(fType2.length>0&&!fType2.includes(combiLabel(item)))return false;
     return true;
   });
 
@@ -3531,7 +3544,7 @@ function renderMyListings(){
     <thead><tr>
       <th style="width:70px">노출</th>
       <th style="width:45px;text-align:center">번호</th>
-      <th style="width:90px"><select id="myf-type" style="${mySelStyle}" onchange="renderMyListings()">${['종류','고시원임대','고시원매매','모텔임대','모텔매매'].map(v=>`<option value="${v==='종류'?'전체':v}"${(v==='종류'?'전체':v)===fType2?' selected':''}>${v}</option>`).join('')}</select></th>
+      <th style="width:90px;position:relative"><button class="type-filter-btn" onclick="event.stopPropagation();toggleTypeDD('myf-type-dd')">종류${fType2.length?' ('+fType2.length+')':' ▾'}</button><div id="myf-type-dd" class="type-filter-dd">${['고시원임대','고시원매매','모텔임대','모텔매매'].map(v=>'<label onclick="event.stopPropagation()"><input type=checkbox value="'+v+'"'+(fType2.includes(v)?' checked':'')+' onchange="onTypeCheck(\'myf\',\'renderMyListings\')"> '+v+'</label>').join('')}</div></th>
       <th style="min-width:150px">매물명</th>
       <th>위치</th>
       <th style="width:170px;white-space:nowrap">가격</th>
@@ -3542,6 +3555,7 @@ function renderMyListings(){
     <tbody>${tableBody}</tbody>
   </table>
   </div>`;
+  if(myDDOpen){const dd=document.getElementById('myf-type-dd');if(dd)dd.style.display='block';}
 }
 function bulkRefreshMyToday(){
   if(!currentUser)return;
@@ -3989,11 +4003,12 @@ function renderAListings(){
   const ownerNames=[...new Set(all.map(i=>i.ownerName||'마스터'))];
 
   // 현재 필터 값 읽기
+  const aDDOpen=document.getElementById('alf-type-dd')?.style.display==='block';
   const fOwner=document.getElementById('alf-owner')?.value||'전체';
-  const fType =document.getElementById('alf-type')?.value||'전체';
+  const fType =aTypeChecked;
   const filtered=all.filter(item=>{
     if(fOwner!=='전체'&&(item.ownerName||'마스터')!==fOwner)return false;
-    if(fType!=='전체'&&combiLabel(item)!==fType)return false;
+    if(fType.length>0&&!fType.includes(combiLabel(item)))return false;
     return true;
   });
 
@@ -4030,10 +4045,9 @@ function renderAListings(){
             ${ownerNames.map(n=>`<option${n===fOwner?' selected':''}>` + `${n}</option>`).join('')}
           </select>
         </th>
-        <th style="width:90px;white-space:nowrap">
-          <select id="alf-type" style="${selStyle}" onchange="renderAListings()">
-            ${['종류','고시원임대','고시원매매','모텔임대','모텔매매'].map(v=>`<option value="${v==='종류'?'전체':v}"${(v==='종류'?'전체':v)===fType?' selected':''}>${v}</option>`).join('')}
-          </select>
+        <th style="width:90px;white-space:nowrap;position:relative">
+          <button class="type-filter-btn" onclick="event.stopPropagation();toggleTypeDD('alf-type-dd')">종류${fType.length?' ('+fType.length+')':' ▾'}</button>
+          <div id="alf-type-dd" class="type-filter-dd">${['고시원임대','고시원매매','모텔임대','모텔매매'].map(v=>'<label onclick="event.stopPropagation()"><input type=checkbox value="'+v+'"'+(fType.includes(v)?' checked':'')+' onchange="onTypeCheck(\'alf\',\'renderAListings\')"> '+v+'</label>').join('')}</div>
         </th>
         <th style="min-width:150px;white-space:nowrap">매물명</th>
         <th style="width:90px;white-space:nowrap">위치</th>
@@ -4079,6 +4093,7 @@ function renderAListings(){
     }).join('')}</tbody>
   </table>
   </div>`}`;
+  if(aDDOpen){const dd=document.getElementById('alf-type-dd');if(dd)dd.style.display='block';}
 }
 
 // ════════════════════════════════════════════
@@ -4615,9 +4630,10 @@ function renderAArchived(){
     return;
   }
   const sorted=[...archivedListings].sort((a,b)=>(b.archivedAt||0)-(a.archivedAt||0));
-  const afType=document.getElementById('arf-type')?.value||'전체';
+  const arDDOpen=document.getElementById('arf-type-dd')?.style.display==='block';
+  const afType=arTypeChecked;
   const afFiltered=sorted.filter(item=>{
-    if(afType!=='전체'&&combiLabel(item)!==afType)return false;
+    if(afType.length>0&&!afType.includes(combiLabel(item)))return false;
     return true;
   });
   const arSelStyle=`background:var(--surface3);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:3px 6px;font-size:11px;font-family:inherit;cursor:pointer;outline:none;width:100%;margin-top:4px`;
@@ -4631,7 +4647,7 @@ function renderAArchived(){
     <thead><tr>
       <th style="width:45px;text-align:center">번호</th>
       <th>담당자</th>
-      <th style="width:90px"><select id="arf-type" style="${arSelStyle}" onchange="renderAArchived()">${['종류','고시원임대','고시원매매','모텔임대','모텔매매'].map(v=>`<option value="${v==='종류'?'전체':v}"${(v==='종류'?'전체':v)===afType?' selected':''}>${v}</option>`).join('')}</select></th>
+      <th style="width:90px;position:relative"><button class="type-filter-btn" onclick="event.stopPropagation();toggleTypeDD('arf-type-dd')">종류${afType.length?' ('+afType.length+')':' ▾'}</button><div id="arf-type-dd" class="type-filter-dd">${['고시원임대','고시원매매','모텔임대','모텔매매'].map(v=>'<label onclick="event.stopPropagation()"><input type=checkbox value="'+v+'"'+(afType.includes(v)?' checked':'')+' onchange="onTypeCheck(\'arf\',\'renderAArchived\')"> '+v+'</label>').join('')}</div></th>
       <th style="min-width:150px">매물명</th>
       <th>위치</th>
       <th style="width:170px;white-space:nowrap">가격</th>
@@ -4655,6 +4671,7 @@ function renderAArchived(){
       </tr>`;
     }).join('')}</tbody>
   </table></div>`;
+  if(arDDOpen){const dd=document.getElementById('arf-type-dd');if(dd)dd.style.display='block';}
 }
 
 function restoreArchived(lid){
