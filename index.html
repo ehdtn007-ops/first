@@ -955,7 +955,7 @@ select:hover,select:focus{border-color:var(--accent)}
 <div class="overlay hidden" id="ov-edit-listing">
   <div class="modal modal-wide" style="max-height:92vh;overflow-y:auto">
     <button class="modal-close" onclick="closeAll()">✕</button>
-    <div class="modal-title">✏️ 매물 수정</div>
+    <div class="modal-title">✏️ 매물 수정 <span id="edit-listing-no" style="font-size:14px;color:var(--accent);font-weight:700;margin-left:8px"></span></div>
     <div class="modal-sub">수정 후 저장하면 즉시 반영됩니다</div>
     <div class="errmsg" id="elerr"></div>
     <div class="fsec" style="margin-top:0;padding-top:0;border-top:none">🏠 기본 정보</div>
@@ -2530,7 +2530,7 @@ function render(){
           <div style="display:flex;gap:4px"><span class="dtag ${pinClass(item)}">${combiLabel(item)}</span></div>
           <span class="cprice">${isRent?`보${wonShort(item.deposit)}/월${wonShort(item.monthly||0)}`:wonShort(item.price)}</span>
         </div>
-        <div class="cname">${item.name}</div>
+        <div class="cname">${item.no?'<span style="color:var(--accent);font-weight:700;margin-right:4px">No.'+item.no+'</span>':''}${item.name}</div>
         ${isRent&&investSum>0?`<div style="font-size:11px;color:var(--red);font-weight:700;margin-bottom:4px">합금액 ${won(investSum)} <span style="font-size:10px;opacity:.7">(보증금+권리금)</span></div>`:''}
         <div class="cmeta">
           <span>📍 ${currentUser?fullAddr(item):maskAddr(item)}</span>
@@ -2866,7 +2866,7 @@ function renderFavList(){
     c.innerHTML=`
       <button class="card-fav on" onclick="event.stopPropagation();toggleFav('${item.lid}')">❤️</button>
       <div class="ctop"><div style="display:flex;gap:4px"><span class="dtag ${pinClass(item)}">${combiLabel(item)}</span></div><span class="cprice">${isRent?`보${wonShort(item.deposit)}/월${wonShort(item.monthly||0)}`:wonShort(item.price)}</span></div>
-      <div class="cname">${item.name}</div>
+      <div class="cname">${item.no?'<span style="color:var(--accent);font-weight:700;margin-right:4px">No.'+item.no+'</span>':''}${item.name}</div>
       ${isRent?`<div style="font-size:11px;color:var(--red);font-weight:700;margin-bottom:4px">합계 ${won(tot)} <span style="font-size:10px;opacity:.7">(보증금+권리금)</span></div>`:''}
       <div class="cmeta"><span>📍 ${currentUser?fullAddr(item):maskAddr(item)}</span><span>🚪 ${item.rooms||'-'}실</span></div>`;
     c.addEventListener('click',()=>{
@@ -3520,7 +3520,7 @@ function renderMyListings(){
             <span style="padding:3px 8px;border-radius:16px;font-size:10px;font-weight:700;background:${isHidden?'linear-gradient(135deg,#ff6b6b,#e84545)':'transparent'};color:${isHidden?'#fff':'rgba(255,255,255,.3)'}">숨김</span>
           </div>
         </td>
-        <td style="font-size:12px;font-weight:700;text-align:center;color:var(--text)">${item.no||''}</td>
+        <td style="text-align:center"><span style="display:inline-block;background:rgba(79,140,255,.15);color:var(--accent);font-size:12px;font-weight:800;padding:2px 8px;border-radius:6px;white-space:nowrap">${item.no?'No.'+item.no:''}</span></td>
         <td><span class="dtag ${pinClass(item)}" style="font-size:10px">${combiLabel(item)}</span></td>
         <td>
           <div style="font-weight:600;font-size:12px">${item.name}</div>
@@ -3543,7 +3543,7 @@ function renderMyListings(){
   <table class="atable">
     <thead><tr>
       <th style="width:70px">노출</th>
-      <th style="width:45px;text-align:center">번호</th>
+      <th style="width:60px;text-align:center">매물번호</th>
       <th style="width:90px;position:relative"><button class="type-filter-btn" onclick="event.stopPropagation();toggleTypeDD('myf-type-dd')">종류${fType2.length?' ('+fType2.length+')':' ▾'}</button><div id="myf-type-dd" class="type-filter-dd">${['고시원임대','고시원매매','모텔임대','모텔매매'].map(v=>'<label onclick="event.stopPropagation()"><input type=checkbox value="'+v+'"'+(fType2.includes(v)?' checked':'')+' onchange="onTypeCheck(\'myf\',\'renderMyListings\')"> '+v+'</label>').join('')}</div></th>
       <th style="min-width:150px">매물명</th>
       <th>위치</th>
@@ -4038,7 +4038,7 @@ function renderAListings(){
     <thead>
       <tr style="border-bottom:none">
         <th style="width:70px;white-space:nowrap">노출</th>
-        <th style="width:45px;white-space:nowrap;text-align:center">번호</th>
+        <th style="width:60px;white-space:nowrap;text-align:center">매물번호</th>
         <th style="width:85px;white-space:nowrap">
           <select id="alf-owner" style="${selStyle}" onchange="renderAListings()">
             <option value="전체">담당자</option>
@@ -4068,7 +4068,7 @@ function renderAListings(){
             <span style="padding:3px 9px;border-radius:16px;font-size:10px;font-weight:700;background:${isHidden?'linear-gradient(135deg,#ff6b6b,#e84545)':'transparent'};color:${isHidden?'#fff':'rgba(255,255,255,.3)'}">🙈 숨김</span>
           </div>
         </td>
-        <td style="font-size:12px;font-weight:700;text-align:center;color:var(--text)">${item.no||''}</td>
+        <td style="text-align:center"><span style="display:inline-block;background:rgba(79,140,255,.15);color:var(--accent);font-size:12px;font-weight:800;padding:2px 8px;border-radius:6px;white-space:nowrap">${item.no?'No.'+item.no:''}</span></td>
         <td style="font-size:11px;font-weight:700;color:var(--accent)">${item.ownerName||'기본'}</td>
         <td><span class="dtag ${pinClass(item)}" style="font-size:10px">${combiLabel(item)}</span></td>
         <td>
@@ -4346,7 +4346,7 @@ function drawListingTable(canvas, items){
 
     // ① No.
     ctx.fillStyle='rgba(180,190,220,.4)'; ctx.font='bold 12px sans-serif'; ctx.textAlign='center';
-    ctx.fillText(idx+1, C.no.x+C.no.w/2, cy+5);
+    ctx.fillText(item.no||idx+1, C.no.x+C.no.w/2, cy+5);
 
     // ② 종류 뱃지
     const tc=tagColors[item.type]||'#64748b';
@@ -4645,7 +4645,7 @@ function renderAArchived(){
   <div style="overflow-x:auto">
   <table class="atable">
     <thead><tr>
-      <th style="width:45px;text-align:center">번호</th>
+      <th style="width:60px;text-align:center">매물번호</th>
       <th>담당자</th>
       <th style="width:90px;position:relative"><button class="type-filter-btn" onclick="event.stopPropagation();toggleTypeDD('arf-type-dd')">종류${afType.length?' ('+afType.length+')':' ▾'}</button><div id="arf-type-dd" class="type-filter-dd">${['고시원임대','고시원매매','모텔임대','모텔매매'].map(v=>'<label onclick="event.stopPropagation()"><input type=checkbox value="'+v+'"'+(afType.includes(v)?' checked':'')+' onchange="onTypeCheck(\'arf\',\'renderAArchived\')"> '+v+'</label>').join('')}</div></th>
       <th style="min-width:150px">매물명</th>
@@ -4657,7 +4657,7 @@ function renderAArchived(){
     <tbody>${afFiltered.map(item=>{
       const d=item.archivedAt?new Date(item.archivedAt).toLocaleDateString('ko-KR',{month:'2-digit',day:'2-digit'}).replace('. ','/').replace('.',''):'-';
       return `<tr>
-        <td style="font-size:12px;font-weight:700;text-align:center;color:var(--text)">${item.no||''}</td>
+        <td style="text-align:center"><span style="display:inline-block;background:rgba(79,140,255,.15);color:var(--accent);font-size:12px;font-weight:800;padding:2px 8px;border-radius:6px;white-space:nowrap">${item.no?'No.'+item.no:''}</span></td>
         <td style="font-size:11px;font-weight:700;color:var(--purple)">${item.ownerName||'기본'}</td>
         <td><span class="dtag ${pinClass(item)}" style="font-size:10px">${combiLabel(item)}</span></td>
         <td style="font-weight:600;font-size:12px">${item.name}</td>
@@ -5159,6 +5159,10 @@ function openEditListing(){
     if(elDongSel)elDongSel.value=item.dong||item.jibun||'';
   },80);
 
+  // 매물번호 표시
+  const editNoEl=document.getElementById('edit-listing-no');
+  if(editNoEl)editNoEl.textContent=item.no?'No.'+item.no:'';
+
   // lid 저장
   document.getElementById('ov-edit-listing').dataset.lid=item.lid;
   document.getElementById('ov-edit-listing').dataset.ownerid=item.ownerId||'';
@@ -5313,7 +5317,7 @@ function openSharePopupFor(item){
   const km=item.keymoney||0;
   const tot=isRent?(item.deposit||0)+km:(item.price||0)+km;
   const roomDesc=(item.gstype?`${item.gstype} `:'')+'방 '+(item.rooms||'-')+'실';
-  let infoHtml=`<strong style="font-size:14px">${item.name}</strong><br>`;
+  let infoHtml=`${item.no?`<span style="color:var(--accent)">No.${item.no}</span> `:''}` + `<strong style="font-size:14px">${item.name}</strong><br>`;
   if(isRent){
     infoHtml+=`보증금 ${won(item.deposit||0)} / 월세 ${won(item.monthly||0)}`;
     infoHtml+=`<br>${roomDesc} · 합계 ${won(tot)}`;
@@ -5355,6 +5359,7 @@ function copyCafeText(item,btn){
     :[`매 매 가 : ${won(item.price||0)}`,km>0?`권 리 금 : ${won(km)}`:'',`합 금 액 : ${won(tot)}`];
 
   const lines=[
+    item.no?`매물번호 : ${item.no}`:'',
     `지 역 : ${fullAddr(item)}`,
     ...priceLines.filter(Boolean),
     `방 : ${item.rooms||'-'}실`,
@@ -5433,7 +5438,7 @@ function copyCafePost(item,btn){
       <div style="position:absolute;top:-20px;right:-20px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.08)"></div>
       <div style="position:absolute;bottom:-30px;left:60px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.06)"></div>
       <div style="font-size:11px;color:rgba(255,255,255,0.75);font-weight:600;letter-spacing:2px;margin-bottom:6px">PROPERTY LISTING</div>
-      <div style="font-size:22px;font-weight:900;color:#fff;letter-spacing:-0.5px;text-shadow:0 2px 8px rgba(0,0,0,0.3)">${item.name}</div>
+      <div style="font-size:22px;font-weight:900;color:#fff;letter-spacing:-0.5px;text-shadow:0 2px 8px rgba(0,0,0,0.3)">${item.no?'No.'+item.no+' ':''}${item.name}</div>
       <div style="margin-top:8px;display:flex;gap:8px">
         <span style="background:rgba(255,255,255,0.2);color:#fff;font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;border:1px solid rgba(255,255,255,0.3)">${item.type}</span>
         <span style="background:rgba(255,255,255,0.2);color:#fff;font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;border:1px solid rgba(255,255,255,0.3)">${item.deal}</span>
@@ -7018,7 +7023,7 @@ function renderRecentList(){
       +(item.images&&item.images.length?'<div style="width:100%;height:80px;overflow:hidden;border-radius:8px;margin-bottom:6px"><img src="'+item.images[0]+'" style="width:100%;height:100%;object-fit:cover" loading="lazy"></div>':'')
       +'<div class="ctop"><div style="display:flex;gap:4px"><span class="dtag '+pinClass(item)+'">'+combiLabel(item)+'</span></div>'
       +'<span class="cprice">'+(isRent?'보'+wonShort(item.deposit)+'/월'+wonShort(item.monthly||0):wonShort(item.price))+'</span></div>'
-      +'<div class="cname">'+item.name+'</div>'
+      +'<div class="cname">'+(item.no?'<span style="color:var(--accent);font-weight:700;margin-right:4px">No.'+item.no+'</span>':'')+item.name+'</div>'
       +'<div class="cmeta"><span>📍 '+(currentUser?fullAddr(item):maskAddr(item))+'</span><span>🚪 '+(item.rooms||'-')+'실</span></div>';
     c.addEventListener('click',function(){
       activeId=item.lid;activePopupItem=item;render();showPopup(item);
