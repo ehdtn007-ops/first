@@ -3974,6 +3974,7 @@ function renderAListings(){
     <thead>
       <tr style="border-bottom:none">
         <th style="width:70px;white-space:nowrap">노출</th>
+        <th style="width:45px;white-space:nowrap;text-align:center">번호</th>
         <th style="width:60px;white-space:nowrap">
           담당자
           <select id="alf-owner" style="${selStyle}" onchange="renderAListings()">
@@ -4012,8 +4013,10 @@ function renderAListings(){
             <span style="padding:3px 9px;border-radius:16px;font-size:10px;font-weight:700;background:${isHidden?'linear-gradient(135deg,#ff6b6b,#e84545)':'transparent'};color:${isHidden?'#fff':'rgba(255,255,255,.3)'}">🙈 숨김</span>
           </div>
         </td>
+        <td style="font-size:12px;font-weight:700;text-align:center;color:var(--text)">${item.no||''}</td>
         <td style="font-size:11px;font-weight:700;color:var(--accent)">${item.ownerName||'기본'}</td>
         <td><span class="dtag ${pinClass(item)}" style="font-size:10px">${combiLabel(item)}</span></td>
+        <td style="font-size:11px;color:var(--text2)">${item.deal||''}</td>
         <td>
           <div style="font-weight:600;font-size:12px">${item.name}</div>
           ${item.memo?`<div style="margin-top:4px;padding:4px 8px;background:rgba(251,191,36,.08);border-left:2px solid rgba(251,191,36,.5);border-radius:0 6px 6px 0;font-size:10px;color:#fbbf24;line-height:1.5;white-space:pre-wrap;word-break:break-all">🔒 ${item.memo}</div>`:''}
