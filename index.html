@@ -379,7 +379,7 @@ select:hover,select:focus{border-color:var(--accent)}
 .card:hover{border-color:var(--accent);background:#252a3a;transform:translateY(-1px)}
 .card.active{border-color:var(--accent);background:#1e2540;box-shadow:0 0 0 1px var(--accent)}
 .ctop{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:7px;padding-right:26px}
-.dtag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px}
+.dtag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;white-space:nowrap}
 .dtag.매매{background:rgba(79,140,255,.18);color:var(--accent)}
 .dtag.월세{background:rgba(62,207,142,.15);color:var(--green)}
 .dtag.고시원{background:rgba(168,85,247,.15);color:#c084fc}
@@ -3517,7 +3517,7 @@ function renderMyListings(){
           ${item.memo?`<div style="margin-top:3px;padding:3px 7px;background:rgba(251,191,36,.08);border-left:2px solid rgba(251,191,36,.5);border-radius:0 6px 6px 0;font-size:10px;color:#fbbf24;line-height:1.4;white-space:pre-wrap;word-break:break-all">🔒 ${item.memo}</div>`:''}
         </td>
         <td style="color:var(--text2);font-size:11px">${fullAddr(item)}</td>
-        <td style="font-size:11px">${item.deal==='월세'?`보 ${item.deposit||0} / 월 ${item.monthly||0}`:`${item.price||0}만`}${item.keymoney?` <span style="color:var(--red)">+권${item.keymoney}</span>`:''}${item.deal==='월세'?`<div style="color:#3ecf8e;font-size:10px;margin-top:2px;font-weight:600">합 ${won((item.deposit||0)+(item.keymoney||0))}</div>`:''}</td>
+        <td style="font-size:11px;white-space:nowrap">${item.deal==='월세'?`보 ${item.deposit||0} / 월 ${item.monthly||0}`:`${item.price||0}만`}${item.keymoney?` <span style="color:var(--red)">+권${item.keymoney}</span>`:''}${item.deal==='월세'?`<div style="color:#3ecf8e;font-size:10px;margin-top:2px;font-weight:600">합 ${won((item.deposit||0)+(item.keymoney||0))}</div>`:''}</td>
         <td style="font-size:11px;color:var(--text2)">${regDate}</td>
         <td style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">
           <button class="btn btn-sm" style="background:var(--accent);color:#fff;font-size:10px;padding:4px 8px" onclick="openMyEditListing('${item.lid}')">✏️수정</button>
@@ -3534,11 +3534,11 @@ function renderMyListings(){
     <thead><tr>
       <th style="width:70px">노출</th>
       <th style="width:45px;text-align:center">번호</th>
-      <th style="width:80px">종류<select id="myf-type" style="${mySelStyle}" onchange="renderMyListings()">${['전체','고시원','모텔'].map(v=>`<option${v===fType2?' selected':''}>${v}</option>`).join('')}</select></th>
-      <th style="width:65px">거래<select id="myf-deal" style="${mySelStyle}" onchange="renderMyListings()">${['전체','매매','월세'].map(v=>`<option value="${v}"${v===fDeal2?' selected':''}>${v==='월세'?'임대':v}</option>`).join('')}</select></th>
+      <th style="width:80px"><select id="myf-type" style="${mySelStyle}" onchange="renderMyListings()">${['종류','고시원','모텔'].map(v=>`<option value="${v==='종류'?'전체':v}"${(v==='종류'?'전체':v)===fType2?' selected':''}>${v}</option>`).join('')}</select></th>
+      <th style="width:80px"><select id="myf-deal" style="${mySelStyle}" onchange="renderMyListings()">${['거래','매매','월세'].map(v=>`<option value="${v==='거래'?'전체':v}"${(v==='거래'?'전체':v)===fDeal2?' selected':''}>${v==='월세'?'임대':v}</option>`).join('')}</select></th>
       <th style="min-width:150px">매물명</th>
       <th>위치</th>
-      <th style="width:130px">가격</th>
+      <th style="width:170px;white-space:nowrap">가격</th>
       <th>등록일</th>
       <th style="width:150px">관리</th>
       <th style="width:30px"></th>
@@ -4030,28 +4030,25 @@ function renderAListings(){
       <tr style="border-bottom:none">
         <th style="width:70px;white-space:nowrap">노출</th>
         <th style="width:45px;white-space:nowrap;text-align:center">번호</th>
-        <th style="width:75px;white-space:nowrap">
-          담당자
+        <th style="width:85px;white-space:nowrap">
           <select id="alf-owner" style="${selStyle}" onchange="renderAListings()">
-            <option value="전체">전체</option>
+            <option value="전체">담당자</option>
             ${ownerNames.map(n=>`<option${n===fOwner?' selected':''}>` + `${n}</option>`).join('')}
           </select>
         </th>
         <th style="width:75px;white-space:nowrap">
-          종류
           <select id="alf-type" style="${selStyle}" onchange="renderAListings()">
-            ${['전체','고시원','모텔'].map(v=>`<option${v===fType?' selected':''}>` + `${v}</option>`).join('')}
+            ${['종류','고시원','모텔'].map(v=>`<option value="${v==='종류'?'전체':v}"${(v==='종류'?'전체':v)===fType?' selected':''}>${v}</option>`).join('')}
           </select>
         </th>
-        <th style="width:65px;white-space:nowrap">
-          거래
+        <th style="width:80px;white-space:nowrap">
           <select id="alf-deal" style="${selStyle}" onchange="renderAListings()">
-            ${['전체','매매','월세'].map(v=>`<option value="${v}"${v===fDeal?' selected':''}>${v==='월세'?'임대':v}</option>`).join('')}
+            ${['거래','매매','월세'].map(v=>`<option value="${v==='거래'?'전체':v}"${(v==='거래'?'전체':v)===fDeal?' selected':''}>${v==='월세'?'임대':v}</option>`).join('')}
           </select>
         </th>
         <th style="min-width:150px;white-space:nowrap">매물명</th>
         <th style="width:90px;white-space:nowrap">위치</th>
-        <th style="width:130px;white-space:nowrap">가격</th>
+        <th style="width:170px;white-space:nowrap">가격</th>
         <th style="width:70px;white-space:nowrap">등록일</th>
         <th style="width:120px;white-space:nowrap">관리</th>
         <th style="width:30px;white-space:nowrap"></th>
@@ -4077,7 +4074,7 @@ function renderAListings(){
           ${item.memo?`<div style="margin-top:4px;padding:4px 8px;background:rgba(251,191,36,.08);border-left:2px solid rgba(251,191,36,.5);border-radius:0 6px 6px 0;font-size:10px;color:#fbbf24;line-height:1.5;white-space:pre-wrap;word-break:break-all">🔒 ${item.memo}</div>`:''}
         </td>
         <td style="color:var(--text2);font-size:11px">${fullAddr(item)}</td>
-        <td style="font-size:11px">${fmtPrice(item)}${item.deal==='월세'?`<div style="color:#3ecf8e;font-size:10px;margin-top:2px;font-weight:600">합 ${won((item.deposit||0)+(item.keymoney||0))}</div>`:''}</td>
+        <td style="font-size:11px;white-space:nowrap">${fmtPrice(item)}${item.deal==='월세'?`<div style="color:#3ecf8e;font-size:10px;margin-top:2px;font-weight:600">합 ${won((item.deposit||0)+(item.keymoney||0))}</div>`:''}</td>
         <td style="font-size:11px;color:var(--text2)">${regDate}</td>
         <td>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;width:130px">
@@ -4648,11 +4645,11 @@ function renderAArchived(){
     <thead><tr>
       <th style="width:45px;text-align:center">번호</th>
       <th>담당자</th>
-      <th style="width:80px">종류<select id="arf-type" style="${arSelStyle}" onchange="renderAArchived()">${['전체','고시원','모텔'].map(v=>`<option${v===afType?' selected':''}>${v}</option>`).join('')}</select></th>
-      <th style="width:65px">거래<select id="arf-deal" style="${arSelStyle}" onchange="renderAArchived()">${['전체','매매','월세'].map(v=>`<option value="${v}"${v===afDeal?' selected':''}>${v==='월세'?'임대':v}</option>`).join('')}</select></th>
+      <th style="width:80px"><select id="arf-type" style="${arSelStyle}" onchange="renderAArchived()">${['종류','고시원','모텔'].map(v=>`<option value="${v==='종류'?'전체':v}"${(v==='종류'?'전체':v)===afType?' selected':''}>${v}</option>`).join('')}</select></th>
+      <th style="width:80px"><select id="arf-deal" style="${arSelStyle}" onchange="renderAArchived()">${['거래','매매','월세'].map(v=>`<option value="${v==='거래'?'전체':v}"${(v==='거래'?'전체':v)===afDeal?' selected':''}>${v==='월세'?'임대':v}</option>`).join('')}</select></th>
       <th style="min-width:150px">매물명</th>
       <th>위치</th>
-      <th style="width:130px">가격</th>
+      <th style="width:170px;white-space:nowrap">가격</th>
       <th>이동일</th>
       <th style="width:130px">관리</th>
     </tr></thead>
@@ -4665,7 +4662,7 @@ function renderAArchived(){
         <td style="font-size:11px;color:var(--text2)">${item.deal||''}</td>
         <td style="font-weight:600;font-size:12px">${item.name}</td>
         <td style="color:var(--text2);font-size:11px">${fullAddr(item)}</td>
-        <td style="font-size:11px">${fmtPrice(item)}${item.deal==='월세'?`<div style="color:#3ecf8e;font-size:10px;margin-top:2px;font-weight:600">합 ${won((item.deposit||0)+(item.keymoney||0))}</div>`:''}</td>
+        <td style="font-size:11px;white-space:nowrap">${fmtPrice(item)}${item.deal==='월세'?`<div style="color:#3ecf8e;font-size:10px;margin-top:2px;font-weight:600">합 ${won((item.deposit||0)+(item.keymoney||0))}</div>`:''}</td>
         <td style="font-size:11px;color:var(--text2)">${d}</td>
         <td style="display:flex;gap:4px;flex-wrap:wrap">
           <button class="btn btn-sm btn-green" onclick="restoreArchived('${item.lid}')">↩️ 복원</button>
