@@ -113,9 +113,11 @@ header{display:flex;align-items:center;gap:14px;padding:0 18px;height:54px;backg
 /* ═══ 뷰 전환 배너 ═══ */
 .view-switcher{
   position:absolute;top:16px;left:50%;transform:translateX(-50%);
-  display:flex;align-items:center;justify-content:center;
+  display:flex;align-items:center;justify-content:center;gap:10px;
   z-index:101;pointer-events:all;
 }
+.map-add-listing-btn{background:linear-gradient(135deg,var(--accent),#6fa8ff);color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 2px 10px rgba(79,140,255,.3);white-space:nowrap;transition:transform .15s,box-shadow .15s;font-family:inherit}
+.map-add-listing-btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(79,140,255,.4)}
 .view-toggle{
   display:flex;align-items:center;
   background:rgba(15,17,23,0.85);
@@ -1181,6 +1183,7 @@ select:hover,select:focus{border-color:var(--accent)}
           <span class="view-tab-icon">📋</span> 게시판 보기
         </div>
       </div>
+      <button id="map-add-listing-btn" class="map-add-listing-btn" onclick="openListing()" style="display:none">➕ 매물등록</button>
     </div>
     <!-- 사무소 정보 카드 -->
     <div class="agency-card">
@@ -1283,6 +1286,7 @@ select:hover,select:focus{border-color:var(--accent)}
           <span class="view-tab-icon">📋</span> 게시판 보기
         </div>
       </div>
+      <button id="board-add-listing-btn" class="map-add-listing-btn" onclick="openListing()" style="display:none">➕ 매물등록</button>
     </div>
     <div id="board-toolbar"></div>
     <div class="board-grid" id="board-grid"></div>
@@ -3138,6 +3142,11 @@ function renderHeader(){
       <button class="hbtn" onclick="doLogout()">로그아웃</button>`;
     notice.classList.toggle('hidden',!isPending);
   }
+  // 매물등록 버튼 표시 (로그인 사용자만)
+  const mapAddBtn=document.getElementById('map-add-listing-btn');
+  const boardAddBtn=document.getElementById('board-add-listing-btn');
+  if(mapAddBtn)mapAddBtn.style.display=currentUser?'':'none';
+  if(boardAddBtn)boardAddBtn.style.display=currentUser?'':'none';
 }
 
 // ════════════════════════════════════════════
@@ -3973,7 +3982,7 @@ function renderAMembers(){
 function renderAListings(){
   const el=document.getElementById('as-listings');
   const all=[
-    ...BASE.map(b=>({...b,ownerId:null,ownerName:'기본',ownerPhone:''})),
+    ...BASE.map(b=>({...b,ownerId:null,ownerName:b.registeredBy||'마스터',ownerPhone:''})),
     ...users.flatMap(u=>{
       if(u.role==='master'||!u.listings)return[];
       return u.listings.map(l=>({...l,ownerId:u.id,ownerName:u.name,ownerPhone:u.phone}));
@@ -3981,17 +3990,19 @@ function renderAListings(){
   ];
 
   // 담당자 목록 수집
-  const ownerNames=[...new Set(all.map(i=>i.ownerName||'기본'))];
+  const ownerNames=[...new Set(all.map(i=>i.ownerName||'마스터'))];
 
   // 현재 필터 값 읽기
   const fOwner=document.getElementById('alf-owner')?.value||'전체';
   const fType =document.getElementById('alf-type')?.value||'전체';
   const fDeal =document.getElementById('alf-deal')?.value||'전체';
+  const fName =document.getElementById('alf-name')?.value||'';
 
   const filtered=all.filter(item=>{
-    if(fOwner!=='전체'&&(item.ownerName||'기본')!==fOwner)return false;
+    if(fOwner!=='전체'&&(item.ownerName||'마스터')!==fOwner)return false;
     if(fType!=='전체'&&item.type!==fType)return false;
     if(fDeal!=='전체'&&item.deal!==fDeal)return false;
+    if(fName&&!(item.name||'').includes(fName))return false;
     return true;
   });
 
@@ -4022,14 +4033,14 @@ function renderAListings(){
       <tr style="border-bottom:none">
         <th style="width:70px;white-space:nowrap">노출</th>
         <th style="width:45px;white-space:nowrap;text-align:center">번호</th>
-        <th style="width:60px;white-space:nowrap">
+        <th style="width:75px;white-space:nowrap">
           담당자
           <select id="alf-owner" style="${selStyle}" onchange="renderAListings()">
             <option value="전체">전체</option>
             ${ownerNames.map(n=>`<option${n===fOwner?' selected':''}>` + `${n}</option>`).join('')}
           </select>
         </th>
-        <th style="width:80px;white-space:nowrap">
+        <th style="width:75px;white-space:nowrap">
           종류
           <select id="alf-type" style="${selStyle}" onchange="renderAListings()">
             ${['전체','고시원','모텔'].map(v=>`<option${v===fType?' selected':''}>` + `${v}</option>`).join('')}
@@ -4041,7 +4052,10 @@ function renderAListings(){
             ${['전체','매매','월세'].map(v=>`<option value="${v}"${v===fDeal?' selected':''}>${v==='월세'?'임대':v}</option>`).join('')}
           </select>
         </th>
-        <th style="min-width:150px;white-space:nowrap">매물명</th>
+        <th style="min-width:150px;white-space:nowrap">
+          매물명
+          <input id="alf-name" type="text" placeholder="매물명 검색" value="${fName}" oninput="renderAListings()" style="${selStyle};width:100%;box-sizing:border-box">
+        </th>
         <th style="width:90px;white-space:nowrap">위치</th>
         <th style="width:130px;white-space:nowrap">가격</th>
         <th style="width:70px;white-space:nowrap">등록일</th>
