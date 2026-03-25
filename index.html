@@ -3996,13 +3996,10 @@ function renderAListings(){
   const fOwner=document.getElementById('alf-owner')?.value||'전체';
   const fType =document.getElementById('alf-type')?.value||'전체';
   const fDeal =document.getElementById('alf-deal')?.value||'전체';
-  const fName =document.getElementById('alf-name')?.value||'';
-
   const filtered=all.filter(item=>{
     if(fOwner!=='전체'&&(item.ownerName||'마스터')!==fOwner)return false;
     if(fType!=='전체'&&item.type!==fType)return false;
     if(fDeal!=='전체'&&item.deal!==fDeal)return false;
-    if(fName&&!(item.name||'').includes(fName))return false;
     return true;
   });
 
@@ -4052,10 +4049,7 @@ function renderAListings(){
             ${['전체','매매','월세'].map(v=>`<option value="${v}"${v===fDeal?' selected':''}>${v==='월세'?'임대':v}</option>`).join('')}
           </select>
         </th>
-        <th style="min-width:150px;white-space:nowrap">
-          매물명
-          <input id="alf-name" type="text" placeholder="매물명 검색" value="${fName}" oninput="renderAListings()" style="${selStyle};width:100%;box-sizing:border-box">
-        </th>
+        <th style="min-width:150px;white-space:nowrap">매물명</th>
         <th style="width:90px;white-space:nowrap">위치</th>
         <th style="width:130px;white-space:nowrap">가격</th>
         <th style="width:70px;white-space:nowrap">등록일</th>
