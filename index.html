@@ -6155,7 +6155,7 @@ async function loadFromFirebase(){
     }
   }catch(e){localStorage.removeItem('sessionToken');}
   // ── Firebase Auth 세션 복원 (마스터) ──
-  if(!currentUser && auth.currentUser){
+  if(!currentUser && auth.currentUser && !auth.currentUser.isAnonymous){
     var masterUser=users.find(u=>u.role==='master');
     if(masterUser){
       masterUser.email=auth.currentUser.email;
