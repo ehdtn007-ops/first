@@ -7,7 +7,7 @@ const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  projectId: 'bssbs-25cc1'
+  projectId: 'my-first-site-fad82'
 });
 
 const db = admin.firestore();

@@ -8,8 +8,8 @@
 <meta property="og:site_name" content="첫번째공인중개사사무소">
 <meta property="og:title" content="고시원매매 모텔매매 첫번째부동산">
 <meta property="og:description" content="고시원·모텔·여관 매매 전문 첫번째공인중개사사무소">
-<meta property="og:url" content="https://ehdtn007-ops.github.io/radiant-salamander-60ff0b/">
-<meta property="og:image" content="https://ehdtn007-ops.github.io/radiant-salamander-60ff0b/share.png">
+<meta property="og:url" content="https://ehdtn007-ops.github.io/first/">
+<meta property="og:image" content="https://ehdtn007-ops.github.io/first/share.png">
 <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=101abfc1122832bf82c274c879984a27&libraries=services&autoload=false"></script>
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -20,12 +20,12 @@
 <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js" crossorigin="anonymous"></script>
 <script>
 const firebaseConfig = {
-  apiKey: "AIzaSyBJ90L8kSbfEhEfxJ_A1Bb5UPDQZhFFKkE",
-  authDomain: "bssbs-25cc1.firebaseapp.com",
-  projectId: "bssbs-25cc1",
-  storageBucket: "bssbs-25cc1.firebasestorage.app",
-  messagingSenderId: "442806584816",
-  appId: "1:442806584816:web:ae14351a86f039f4664935"
+  apiKey: "AIzaSyD5sY2g4t6M3U82ZJjKwQvi7-o5WuvVFFg",
+  authDomain: "my-first-site-fad82.firebaseapp.com",
+  projectId: "my-first-site-fad82",
+  storageBucket: "my-first-site-fad82.firebasestorage.app",
+  messagingSenderId: "841269966344",
+  appId: "1:841269966344:web:5f534de3d2588a0ca483bd"
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
@@ -1452,58 +1452,6 @@ function updateHeaderDong(){
 // 데이터 (Firebase Firestore 연동)
 // ════════════════════════════════════════════
 let users = [];
-// ── 시드 데이터 (최초 마이그레이션용, Firestore에 올라가면 이후 사용 안 됨) ──
-const SEED_DATA = [
-  {lid:'b1',type:'고시원',deal:'매매',name:'공덕 스마트고시원',prov:'서울',area:'마포구',dong:'공덕동',price:8500,keymoney:1200,rooms:14,baths:14,area2:165,floor:2,totalfloor:4,direction:'남향',parking:3,maintenance:20,year:2010,movein:'협의',approvedate:'2024-01-05',illegal:'해당없음',desc:'공덕역 역세권, 만실 운영 중.\n풀옵션 고시원, 수익률 안정적.'},
-  {lid:'b2',type:'고시원',deal:'매매',name:'서초 하우스고시원',prov:'서울',area:'서초구',dong:'서초동',price:18000,keymoney:3000,rooms:22,baths:22,area2:280,floor:4,totalfloor:6,direction:'남동향',parking:6,maintenance:35,year:2013,movein:'협의',approvedate:'2024-02-01',illegal:'해당없음',desc:'서울대 인근 대학가 고시원.\n수험생 수요 풍부, 장기 공실 없음.'},
-  {lid:'b3',type:'고시원',deal:'매매',name:'잠실 편한고시원',prov:'서울',area:'송파구',dong:'잠실동',price:22000,keymoney:2500,rooms:28,baths:28,area2:360,floor:3,totalfloor:5,direction:'남향',parking:8,maintenance:40,year:2016,movein:'즉시',approvedate:'2024-03-15',illegal:'해당없음',desc:'잠실역 도보 5분.\n2층부터 4층 전체 고시원 운영.\n리모델링 2023년 완료.'},
-  {lid:'b4',type:'고시원',deal:'월세',name:'마포 클린고시원',prov:'서울',area:'마포구',dong:'아현동',deposit:300,monthly:45,keymoney:800,rooms:12,baths:12,area2:140,floor:3,totalfloor:4,direction:'남서향',parking:2,maintenance:15,year:2020,movein:'2024-05-01',approvedate:'2024-04-10',illegal:'해당없음',desc:'신축 고시원, 전 실 에어컨 설치.\n홍대 상권 근접, 젊은 수요층.'},
-  {lid:'b5',type:'모텔',deal:'매매',name:'마포 뉴스타모텔',prov:'서울',area:'마포구',dong:'서교동',price:42000,keymoney:0,rooms:30,baths:30,area2:980,floor:6,totalfloor:6,direction:'북동향',parking:15,maintenance:150,year:2000,movein:'협의',approvedate:'2023-12-20',illegal:'해당없음',desc:'홍대입구역 도보 7분.\n30실 운영, 주차 15대.\n리모델링 필요 (가격 반영됨).'},
-  {lid:'b6',type:'모텔',deal:'매매',name:'용산 그랜드모텔',prov:'서울',area:'용산구',dong:'이태원동',price:120000,keymoney:8000,rooms:60,baths:60,area2:2400,floor:10,totalfloor:10,direction:'남향',parking:30,maintenance:300,year:2008,movein:'협의',approvedate:'2024-03-01',illegal:'해당없음',desc:'이태원 핵심 상권 위치.\n10층 건물 전체, 프리미엄 입지.\n외국인 관광객 수요 지속적.'},
-  {lid:'b7',type:'모텔',deal:'매매',name:'송파 파크모텔',prov:'서울',area:'송파구',dong:'방이동',price:65000,keymoney:4000,rooms:38,baths:38,area2:1250,floor:7,totalfloor:7,direction:'남동향',parking:20,maintenance:180,year:2003,movein:'즉시',approvedate:'2024-01-25',illegal:'해당없음',desc:'올림픽공원 인접, 행사 시즌 수요 높음.\n리모델링 2020년 완료.'},
-  {lid:'b8',type:'모텔',deal:'월세',name:'강남 루나모텔',prov:'서울',area:'강남구',dong:'논현동',deposit:5000,monthly:800,keymoney:3000,rooms:28,baths:28,area2:920,floor:5,totalfloor:8,direction:'남서향',parking:12,maintenance:120,year:2006,movein:'2024-04-15',approvedate:'2024-03-30',illegal:'해당없음',desc:'수익형 임대 최적 입지.\n강남 논현동 중심가, 접근성 최상.'},
-  {lid:'b9',type:'모텔',deal:'월세',name:'이태원 글로벌모텔',prov:'서울',area:'용산구',dong:'이태원동',deposit:6000,monthly:900,keymoney:5000,rooms:35,baths:35,area2:1150,floor:7,totalfloor:7,direction:'북서향',parking:18,maintenance:160,year:2011,movein:'협의',approvedate:'2024-02-28',illegal:'해당없음',desc:'외국인 수요 풍부한 이태원 소재.\n7층 전체 운영, 연중 높은 점유율 유지.'},
-  {lid:'b10',type:'고시원',deal:'매매',name:'신촌 유니버시티고시원',prov:'서울',area:'서대문구',dong:'신촌동',price:12000,keymoney:1800,rooms:18,baths:18,area2:220,floor:3,totalfloor:5,direction:'남향',parking:0,maintenance:25,year:2014,movein:'협의',approvedate:'2024-01-15',illegal:'해당없음',desc:'연세대·이화여대 인근 대학가 핵심 입지.\n수험생·대학생 수요 연중 풍부.\n만실 운영 중, 안정적 수익.'},
-  {lid:'b11',type:'고시원',deal:'매매',name:'노원 스마일고시원',prov:'서울',area:'노원구',dong:'상계동',price:7500,keymoney:900,rooms:16,baths:16,area2:185,floor:2,totalfloor:4,direction:'남동향',parking:2,maintenance:18,year:2012,movein:'즉시',approvedate:'2024-02-10',illegal:'해당없음',desc:'노원역 도보 7분.\n주변 학원가 배후수요 풍부.\n리모델링 2021년 완료.'},
-  {lid:'b12',type:'고시원',deal:'월세',name:'종로 고시촌고시원',prov:'서울',area:'종로구',dong:'혜화동',deposit:200,monthly:38,keymoney:600,rooms:10,baths:10,area2:120,floor:4,totalfloor:5,direction:'북향',parking:0,maintenance:10,year:2008,movein:'2024-06-01',approvedate:'2024-05-01',illegal:'해당없음',desc:'혜화역 도보 3분, 고시촌 중심가.\n수험생 전문 고시원, 조용한 환경.'},
-  {lid:'b13',type:'모텔',deal:'매매',name:'종로 센터모텔',prov:'서울',area:'종로구',dong:'종로3가',price:55000,keymoney:3000,rooms:32,baths:32,area2:1050,floor:6,totalfloor:6,direction:'남향',parking:10,maintenance:180,year:2001,movein:'협의',approvedate:'2023-11-20',illegal:'해당없음',desc:'종로3가역 코너 위치, 유동인구 최다.\n6층 전체 운영, 리모델링 협의 가능.'},
-  {lid:'b14',type:'고시원',deal:'매매',name:'영등포 비즈고시원',prov:'서울',area:'영등포구',dong:'영등포동',price:9800,keymoney:1500,rooms:20,baths:20,area2:245,floor:5,totalfloor:8,direction:'남서향',parking:4,maintenance:30,year:2016,movein:'협의',approvedate:'2024-03-05',illegal:'해당없음',desc:'영등포역 도보 5분.\n직장인·수험생 혼합 수요.\n현재 만실, 수익률 8.5%.'},
-  {lid:'b15',type:'모텔',deal:'매매',name:'영등포 타임모텔',prov:'서울',area:'영등포구',dong:'문래동',price:48000,keymoney:2500,rooms:28,baths:28,area2:920,floor:5,totalfloor:5,direction:'동향',parking:12,maintenance:140,year:2004,movein:'즉시',approvedate:'2024-01-30',illegal:'해당없음',desc:'문래 창작촌 인근, 젊은 수요층.\n리모델링 2019년 완료, 내부 깔끔.'},
-  {lid:'b16',type:'고시원',deal:'월세',name:'강서 마곡고시원',prov:'서울',area:'강서구',dong:'마곡동',deposit:300,monthly:42,keymoney:700,rooms:14,baths:14,area2:168,floor:3,totalfloor:4,direction:'남향',parking:3,maintenance:15,year:2019,movein:'2024-05-15',approvedate:'2024-04-20',illegal:'해당없음',desc:'마곡 LG사이언스파크 인근.\n직장인 수요 폭발적, 항상 대기자 있음.\n신축급 깔끔한 시설.'},
-  {lid:'b17',type:'모텔',deal:'월세',name:'강서 공항모텔',prov:'서울',area:'강서구',dong:'공항동',deposit:4000,monthly:650,keymoney:2000,rooms:25,baths:25,area2:820,floor:4,totalfloor:4,direction:'남서향',parking:15,maintenance:110,year:2007,movein:'협의',approvedate:'2024-02-15',illegal:'해당없음',desc:'김포공항 인근, 외국인·여행객 수요.\n연중 높은 점유율 유지.'},
-  {lid:'b18',type:'고시원',deal:'매매',name:'성북 고려대고시원',prov:'서울',area:'성북구',dong:'안암동',price:10500,keymoney:1200,rooms:17,baths:17,area2:200,floor:3,totalfloor:4,direction:'남향',parking:0,maintenance:20,year:2013,movein:'협의',approvedate:'2024-02-20',illegal:'해당없음',desc:'고려대학교 정문 도보 3분.\n수험생·대학원생 수요 풍부.\n만실 운영 중.'},
-  {lid:'b19',type:'고시원',deal:'월세',name:'동대문 청계고시원',prov:'서울',area:'동대문구',dong:'청량리동',deposit:250,monthly:35,keymoney:500,rooms:12,baths:12,area2:138,floor:2,totalfloor:5,direction:'동향',parking:0,maintenance:12,year:2010,movein:'즉시',approvedate:'2024-03-10',illegal:'해당없음',desc:'청량리역 환승 편리.\n실속형 저렴한 고시원, 공실 없음.'},
-  {lid:'b20',type:'모텔',deal:'매매',name:'동대문 패션모텔',prov:'서울',area:'동대문구',dong:'신설동',price:38000,keymoney:1500,rooms:22,baths:22,area2:720,floor:5,totalfloor:5,direction:'남동향',parking:8,maintenance:120,year:2003,movein:'협의',approvedate:'2023-12-15',illegal:'해당없음',desc:'동대문 패션타운 인근.\n의류 상인·바이어 수요 풍부.\n리모델링 2018년 완료.'},
-  {lid:'b21',type:'고시원',deal:'매매',name:'중구 을지로고시원',prov:'서울',area:'중구',dong:'을지로',price:16000,keymoney:2200,rooms:22,baths:22,area2:268,floor:6,totalfloor:8,direction:'남향',parking:5,maintenance:35,year:2015,movein:'협의',approvedate:'2024-01-25',illegal:'해당없음',desc:'을지로 오피스 밀집지역.\n직장인 단기 임대 수요 풍부.\n수익률 9% 이상.'},
-  {lid:'b22',type:'모텔',deal:'매매',name:'중구 명동모텔',prov:'서울',area:'중구',dong:'충무로',price:95000,keymoney:7000,rooms:50,baths:50,area2:1850,floor:9,totalfloor:9,direction:'남향',parking:15,maintenance:280,year:2006,movein:'협의',approvedate:'2024-03-20',illegal:'해당없음',desc:'명동 핵심 관광지 인근.\n외국인 관광객 수요 최고.\n9층 전체, 프리미엄 입지.'},
-  {lid:'b23',type:'고시원',deal:'월세',name:'광진 건대고시원',prov:'서울',area:'광진구',dong:'화양동',deposit:400,monthly:48,keymoney:900,rooms:16,baths:16,area2:192,floor:4,totalfloor:5,direction:'남향',parking:2,maintenance:18,year:2018,movein:'2024-06-01',approvedate:'2024-05-10',illegal:'해당없음',desc:'건국대학교 정문 도보 5분.\n대학생·직장인 수요 안정적.\n전 객실 에어컨 풀옵션.'},
-  {lid:'b24',type:'모텔',deal:'월세',name:'광진 스타모텔',prov:'서울',area:'광진구',dong:'구의동',deposit:3500,monthly:550,keymoney:1800,rooms:24,baths:24,area2:780,floor:5,totalfloor:5,direction:'남동향',parking:10,maintenance:130,year:2008,movein:'협의',approvedate:'2024-02-05',illegal:'해당없음',desc:'구의역 인근, 접근성 우수.\n주말 점유율 90% 이상.'},
-  {lid:'b25',type:'고시원',deal:'매매',name:'은평 불광고시원',prov:'서울',area:'은평구',dong:'불광동',price:8000,keymoney:1000,rooms:15,baths:15,area2:178,floor:2,totalfloor:4,direction:'남서향',parking:3,maintenance:16,year:2011,movein:'즉시',approvedate:'2024-01-10',illegal:'해당없음',desc:'불광역 도보 5분.\n주변 대학가·학원가 배후수요.\n안정적 만실 운영.'},
-  {lid:'b26',type:'고시원',deal:'월세',name:'도봉 창동고시원',prov:'서울',area:'도봉구',dong:'창동',deposit:200,monthly:32,keymoney:400,rooms:11,baths:11,area2:130,floor:3,totalfloor:5,direction:'동향',parking:0,maintenance:10,year:2009,movein:'즉시',approvedate:'2024-03-01',illegal:'해당없음',desc:'창동역 도보 6분.\n실속형 저가 고시원.\n장기 투숙자 많아 안정적.'},
-  {lid:'b27',type:'모텔',deal:'매매',name:'강북 수유모텔',prov:'서울',area:'강북구',dong:'수유동',price:28000,keymoney:1000,rooms:20,baths:20,area2:660,floor:4,totalfloor:4,direction:'북향',parking:8,maintenance:90,year:2000,movein:'협의',approvedate:'2023-10-15',illegal:'해당없음',desc:'수유역 인근, 북한산 등산객 수요.\n저렴한 가격 대비 안정적 수익.'},
-  {lid:'b28',type:'고시원',deal:'매매',name:'양천 목동고시원',prov:'서울',area:'양천구',dong:'목동',price:13500,keymoney:1600,rooms:19,baths:19,area2:230,floor:4,totalfloor:6,direction:'남향',parking:5,maintenance:28,year:2014,movein:'협의',approvedate:'2024-02-28',illegal:'해당없음',desc:'목동 학원가 인근 최고 입지.\n수험생 수요 최강, 항상 만실.\n수익률 9.5%.'},
-  {lid:'b29',type:'모텔',deal:'월세',name:'양천 오목교모텔',prov:'서울',area:'양천구',dong:'신정동',deposit:2500,monthly:420,keymoney:1200,rooms:18,baths:18,area2:580,floor:4,totalfloor:4,direction:'남서향',parking:8,maintenance:95,year:2005,movein:'협의',approvedate:'2024-01-20',illegal:'해당없음',desc:'오목교역 인근.\n목동 배후수요, 안정적 점유율.'},
-  {lid:'b30',type:'고시원',deal:'매매',name:'관악 신림고시원',prov:'서울',area:'관악구',dong:'신림동',price:11000,keymoney:1400,rooms:18,baths:18,area2:215,floor:3,totalfloor:5,direction:'남향',parking:0,maintenance:22,year:2013,movein:'즉시',approvedate:'2024-03-15',illegal:'해당없음',desc:'신림역 도보 3분, 고시촌 중심.\n수험생 최다 밀집 지역.\n공실률 0%, 수익률 10%.'},
-  {lid:'b31',type:'고시원',deal:'월세',name:'관악 서울대고시원',prov:'서울',area:'관악구',dong:'봉천동',deposit:300,monthly:40,keymoney:700,rooms:13,baths:13,area2:155,floor:2,totalfloor:4,direction:'남동향',parking:0,maintenance:14,year:2017,movein:'2024-05-20',approvedate:'2024-04-15',illegal:'해당없음',desc:'서울대입구역 도보 5분.\n대학원생·수험생 수요 풍부.'},
-  {lid:'b32',type:'모텔',deal:'매매',name:'관악 낙성대모텔',prov:'서울',area:'관악구',dong:'남현동',price:32000,keymoney:1200,rooms:22,baths:22,area2:720,floor:5,totalfloor:5,direction:'남향',parking:10,maintenance:105,year:2002,movein:'협의',approvedate:'2023-11-10',illegal:'해당없음',desc:'낙성대역 인근.\n서울대 배후 수요, 안정적 운영.'},
-  {lid:'b33',type:'고시원',deal:'매매',name:'성동 왕십리고시원',prov:'서울',area:'성동구',dong:'왕십리동',price:14000,keymoney:1700,rooms:20,baths:20,area2:240,floor:4,totalfloor:6,direction:'남향',parking:4,maintenance:30,year:2016,movein:'협의',approvedate:'2024-02-01',illegal:'해당없음',desc:'왕십리역 초역세권.\n한양대 인근, 대학생·직장인 혼합.\n수익률 8.8%.'},
-  {lid:'b34',type:'모텔',deal:'월세',name:'성동 성수모텔',prov:'서울',area:'성동구',dong:'성수동',deposit:5000,monthly:750,keymoney:3000,rooms:30,baths:30,area2:980,floor:6,totalfloor:6,direction:'남동향',parking:14,maintenance:145,year:2009,movein:'협의',approvedate:'2024-03-25',illegal:'해당없음',desc:'성수 카페거리 인근, 트렌디한 입지.\n주말 점유율 95% 이상.'},
-  {lid:'b35',type:'고시원',deal:'월세',name:'중랑 면목고시원',prov:'서울',area:'중랑구',dong:'면목동',deposit:200,monthly:30,keymoney:300,rooms:10,baths:10,area2:118,floor:2,totalfloor:4,direction:'북동향',parking:0,maintenance:8,year:2007,movein:'즉시',approvedate:'2024-01-05',illegal:'해당없음',desc:'면목역 인근, 저렴한 임대료.\n장기 투숙자 위주, 공실 거의 없음.'},
-  {lid:'b36',type:'고시원',deal:'매매',name:'금천 가산고시원',prov:'서울',area:'금천구',dong:'가산동',price:9000,keymoney:1100,rooms:16,baths:16,area2:190,floor:3,totalfloor:5,direction:'남향',parking:4,maintenance:20,year:2015,movein:'즉시',approvedate:'2024-02-15',illegal:'해당없음',desc:'가산디지털단지역 도보 5분.\nIT기업 직장인 수요 폭발적.\n수익률 9.2%.'},
-  {lid:'b37',type:'모텔',deal:'매매',name:'구로 디지털모텔',prov:'서울',area:'구로구',dong:'구로동',price:41000,keymoney:2000,rooms:26,baths:26,area2:850,floor:5,totalfloor:5,direction:'남서향',parking:11,maintenance:125,year:2003,movein:'협의',approvedate:'2023-12-05',illegal:'해당없음',desc:'구로디지털단지 인근.\n직장인 출장 수요 풍부.\n리모델링 2021년 완료.'},
-  {lid:'b38',type:'고시원',deal:'월세',name:'동작 노량진고시원',prov:'서울',area:'동작구',dong:'노량진동',deposit:300,monthly:43,keymoney:800,rooms:15,baths:15,area2:178,floor:3,totalfloor:5,direction:'남향',parking:0,maintenance:16,year:2012,movein:'2024-06-01',approvedate:'2024-05-01',illegal:'해당없음',desc:'노량진 고시촌 핵심 입지.\n공무원 수험생 수요 최강.\n연중 만실 보장.'},
-  {lid:'b39',type:'고시원',deal:'매매',name:'동작 사당고시원',prov:'서울',area:'동작구',dong:'사당동',price:11500,keymoney:1300,rooms:17,baths:17,area2:205,floor:4,totalfloor:6,direction:'남동향',parking:3,maintenance:24,year:2014,movein:'협의',approvedate:'2024-01-20',illegal:'해당없음',desc:'사당역 환승 편리, 접근성 최상.\n수험생·직장인 혼합 수요.'},
-  {lid:'b40',type:'모텔',deal:'매매',name:'강동 천호모텔',prov:'서울',area:'강동구',dong:'천호동',price:36000,keymoney:1500,rooms:24,baths:24,area2:790,floor:5,totalfloor:5,direction:'남향',parking:10,maintenance:115,year:2002,movein:'즉시',approvedate:'2023-11-25',illegal:'해당없음',desc:'천호역 인근 상권 밀집지.\n지하철 5·8호선 환승역 배후수요.'},
-  {lid:'b41',type:'고시원',deal:'월세',name:'강동 길동고시원',prov:'서울',area:'강동구',dong:'길동',deposit:250,monthly:36,keymoney:500,rooms:12,baths:12,area2:142,floor:2,totalfloor:4,direction:'동향',parking:2,maintenance:12,year:2011,movein:'즉시',approvedate:'2024-02-10',illegal:'해당없음',desc:'길동역 도보 7분.\n실속형 고시원, 장기 투숙자 위주.'},
-  {lid:'b42',type:'모텔',deal:'월세',name:'노원 중계모텔',prov:'서울',area:'노원구',dong:'중계동',deposit:2000,monthly:380,keymoney:900,rooms:16,baths:16,area2:520,floor:4,totalfloor:4,direction:'남향',parking:6,maintenance:80,year:2004,movein:'협의',approvedate:'2024-01-15',illegal:'해당없음',desc:'중계역 인근, 학원가 배후수요.\n저렴한 임대료 대비 안정적 수익.'},
-  {lid:'b43',type:'고시원',deal:'매매',name:'서초 방배고시원',prov:'서울',area:'서초구',dong:'방배동',price:17000,keymoney:2000,rooms:21,baths:21,area2:255,floor:5,totalfloor:7,direction:'남향',parking:6,maintenance:32,year:2015,movein:'협의',approvedate:'2024-03-10',illegal:'해당없음',desc:'방배역 조용한 주거지 인근.\n장기 투숙 직장인 수요 안정적.\n수익률 8.3%.'},
-  {lid:'b44',type:'모텔',deal:'매매',name:'은평 연신내모텔',prov:'서울',area:'은평구',dong:'응암동',price:30000,keymoney:1000,rooms:20,baths:20,area2:660,floor:4,totalfloor:4,direction:'북서향',parking:8,maintenance:95,year:2001,movein:'협의',approvedate:'2023-10-20',illegal:'해당없음',desc:'연신내역 인근.\n은평구 유일 대형 모텔, 안정적 운영.'},
-  {lid:'b45',type:'고시원',deal:'월세',name:'마포 합정고시원',prov:'서울',area:'마포구',dong:'합정동',deposit:400,monthly:50,keymoney:1000,rooms:14,baths:14,area2:168,floor:3,totalfloor:4,direction:'남향',parking:0,maintenance:18,year:2019,movein:'2024-05-01',approvedate:'2024-04-01',illegal:'해당없음',desc:'합정역 도보 3분.\n홍대 상권 인접, 젊은층 수요 풍부.\n신축급 시설.'},
-  {lid:'b46',type:'모텔',deal:'월세',name:'강남 선릉모텔',prov:'서울',area:'강남구',dong:'삼성동',deposit:7000,monthly:1100,keymoney:5000,rooms:40,baths:40,area2:1320,floor:8,totalfloor:8,direction:'남향',parking:25,maintenance:250,year:2010,movein:'협의',approvedate:'2024-03-01',illegal:'해당없음',desc:'선릉역 코엑스 인근 프리미엄 입지.\n비즈니스 출장객 수요 최상.\n연중 점유율 90% 이상.'},
-  {lid:'b47',type:'고시원',deal:'매매',name:'강남 대치고시원',prov:'서울',area:'강남구',dong:'대치동',price:25000,keymoney:3500,rooms:30,baths:30,area2:380,floor:5,totalfloor:7,direction:'남향',parking:8,maintenance:45,year:2012,movein:'협의',approvedate:'2024-02-20',illegal:'해당없음',desc:'대치동 학원가 최중심.\n수험생 수요 서울 최강 입지.\n수익률 10% 이상.'},
-  {lid:'b48',type:'모텔',deal:'매매',name:'송파 잠실파크모텔',prov:'서울',area:'송파구',dong:'석촌동',price:58000,keymoney:3500,rooms:34,baths:34,area2:1120,floor:6,totalfloor:6,direction:'남동향',parking:16,maintenance:165,year:2005,movein:'즉시',approvedate:'2024-01-05',illegal:'해당없음',desc:'석촌호수 인근, 관광객 수요.\n롯데월드·잠실 배후수요 풍부.'},
-  {lid:'b49',type:'고시원',deal:'월세',name:'용산 삼각지고시원',prov:'서울',area:'용산구',dong:'한강로동',deposit:350,monthly:47,keymoney:850,rooms:15,baths:15,area2:180,floor:4,totalfloor:6,direction:'남향',parking:2,maintenance:17,year:2018,movein:'즉시',approvedate:'2024-03-05',illegal:'해당없음',desc:'삼각지역 도보 4분.\n국방부·용산 기업 직장인 수요.\n신축급 깔끔한 시설.'},
-];
 // BASE는 Firestore에서 로드 (초기에는 빈 배열, loadFromFirebase에서 채움)
 let BASE_DATA = [];
 let BASE = BASE_DATA;
@@ -1695,7 +1643,7 @@ function showABCPopup(){
   if(shareBtn){
     shareBtn.style.display='';
     shareBtn.onclick=function(){
-      const url='https://ehdtn007-ops.github.io/radiant-salamander-60ff0b/';
+      const url='https://ehdtn007-ops.github.io/first/';
       document.getElementById('share-name').textContent='첫번째공인중개사사무소';
       document.getElementById('share-url').textContent=url;
       const btn=document.getElementById('copy-btn');
@@ -5312,7 +5260,7 @@ function openSharePopup(){
 function openSharePopupFor(item){
   if(!item)return;
   _shareItem=item;
-  const url=`https://ehdtn007-ops.github.io/radiant-salamander-60ff0b/?lid=${item.lid}`;
+  const url=`https://ehdtn007-ops.github.io/first/?lid=${item.lid}`;
   const isRent=item.deal==='월세';
   const km=item.keymoney||0;
   const tot=isRent?(item.deposit||0)+km:(item.price||0)+km;
@@ -5504,8 +5452,8 @@ function copyCafePost(item,btn){
 function shareKakao(){
   const item=activePopupItem||_shareItem;
   const url=item
-    ?`https://ehdtn007-ops.github.io/radiant-salamander-60ff0b/?lid=${item.lid}`
-    :'https://ehdtn007-ops.github.io/radiant-salamander-60ff0b/';
+    ?`https://ehdtn007-ops.github.io/first/?lid=${item.lid}`
+    :'https://ehdtn007-ops.github.io/first/';
   if(typeof Kakao==='undefined'||!Kakao.isInitialized()){
     alert('카카오 SDK가 로드되지 않았습니다. URL 복사를 이용해 주세요.');return;
   }
@@ -5527,7 +5475,7 @@ function shareKakao(){
     content:{
       title:title,
       description:desc||'고시원·모텔 매매 전문 첫번째공인중개사사무소',
-      imageUrl:'https://ehdtn007-ops.github.io/radiant-salamander-60ff0b/share.png',
+      imageUrl:'https://ehdtn007-ops.github.io/first/share.png',
       link:{webUrl:url,mobileWebUrl:url}
     },
     buttons:[{title:'매물 보기',link:{webUrl:url,mobileWebUrl:url}}]
@@ -5536,8 +5484,8 @@ function shareKakao(){
 function copyShareUrl(){
   const item=activePopupItem||_shareItem;
   const url=item
-    ?`https://ehdtn007-ops.github.io/radiant-salamander-60ff0b/?lid=${item.lid}`
-    :'https://ehdtn007-ops.github.io/radiant-salamander-60ff0b/';
+    ?`https://ehdtn007-ops.github.io/first/?lid=${item.lid}`
+    :'https://ehdtn007-ops.github.io/first/';
   const btn=document.getElementById('copy-btn');
   const ok=()=>{
     if(btn){btn.innerHTML='✅ 복사됐습니다!';btn.style.background='#3ecf8e';btn.style.color='#fff';}
@@ -6093,27 +6041,11 @@ async function loadFromFirebase(){
     // 3. Firestore에서 base_listings 로드
     const baseSnap = await db.collection('base_listings').get();
 
-    if(baseSnap.empty){
-      // ── 최초 마이그레이션: SEED_DATA → Firestore ──
-      console.log('base_listings가 비어있습니다. 시드 데이터 마이그레이션 시작...');
-      const batch1 = db.batch();
-      const batch2 = db.batch();
-      SEED_DATA.forEach((item,i)=>{
-        const ref = db.collection('base_listings').doc(item.lid);
-        if(i<250) batch1.set(ref, item);
-        else batch2.set(ref, item);
-      });
-      await batch1.commit();
-      if(SEED_DATA.length>250) await batch2.commit();
-      console.log(`✅ ${SEED_DATA.length}건 마이그레이션 완료`);
-      BASE_DATA = SEED_DATA.map(item=>({...item}));
-    } else {
-      BASE_DATA = [];
-      baseSnap.forEach(doc=>{
-        BASE_DATA.push(doc.data());
-      });
-      console.log(`Firestore에서 기본 매물 ${BASE_DATA.length}건 로드`);
-    }
+    BASE_DATA = [];
+    baseSnap.forEach(doc=>{
+      BASE_DATA.push(doc.data());
+    });
+    console.log(`Firestore에서 기본 매물 ${BASE_DATA.length}건 로드`);
 
     // hidden/deleted 필터링
     BASE = BASE_DATA.filter(b=>!b._deleted);
@@ -6125,8 +6057,7 @@ async function loadFromFirebase(){
     } else if(e.code === 'permission-denied'){
       console.error('⚠️ Firestore 보안 규칙에서 접근이 거부되었습니다.');
     }
-    // Firebase 연결 실패 시 SEED_DATA로 폴백
-    BASE_DATA = SEED_DATA.map(item=>({...item}));
+    BASE_DATA = [];
     BASE = BASE_DATA;
     users = [
       {id:'master',name:'마스터관리자',phone:'02-0000-0000',license:'',role:'master',status:'active',listings:[]},
@@ -6691,7 +6622,7 @@ async function _aiReg(d){
   }
 
   const ps = isR ? `보증금 ${_w(lst.deposit)} / 월세 ${_w(lst.monthly)}` : `매매가 ${_w(lst.price)}`;
-  const link = `https://ehdtn007-ops.github.io/radiant-salamander-60ff0b/?lid=${lid}`;
+  const link = `https://ehdtn007-ops.github.io/first/?lid=${lid}`;
   let txt = `✅ 매물 등록 완료!\n\n📌 ${lst.name}\n📍 ${lst.prov} ${lst.area} ${lst.dong}\n🏷 ${lst.type} ${lst.deal}\n💰 ${ps}`;
   if(lst.keymoney) txt += `\n💎 권리금 ${_w(lst.keymoney)}`;
   if(lst.maintenance) txt += `\n🏢 관리비 ${_w(lst.maintenance)}/월`;

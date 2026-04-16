@@ -16,7 +16,7 @@
 - 로컬 서버 주소: http://localhost:3000
 - 관리자 페이지: http://localhost:3000/admin
 - 계정 정보: .env 파일 참조 (master, master123)
-- 홈페이지 매물 링크: `https://ehdtn007-ops.github.io/radiant-salamander-60ff0b/?lid={lid}`
+- 홈페이지 매물 링크: `https://ehdtn007-ops.github.io/first/?lid={lid}`
 
 ## 규칙 분리 안내
 - **홈페이지 코드 수정** → `.claude/rules/homepage.md` 를 따른다
@@ -47,7 +47,7 @@
 - 새 대화가 시작되면 `WORK_LOG.md`를 먼저 확인하고, 이전 작업이 남아있으면 이어서 진행할지 물어본다.
 
 ## GitHub 배포 (동기화) 규칙 — 절대 규칙
-- **리포:** `ehdtn007-ops/radiant-salamander-60ff0b` (GitHub Pages)
+- **리포:** `ehdtn007-ops/first` (GitHub Pages)
 - **push 전 반드시 사용자에게 "동기화할까요?" 확인을 받는다.** 자동으로 push 금지.
 - **push 전 반드시 백업 파일을 만든다.** 예: `index.html` → `index_backup_20260323.html` 로컬에 복사 후 push.
 - push 대상 파일만 커밋한다. `.env`, `node_modules`, `.claude` 등 올리지 않는다.
@@ -79,5 +79,5 @@
 
 ## 매물 데이터 구조
 > - **실제 매물 데이터** → **Firebase Firestore** 에 저장됨
-> - Firebase 프로젝트: `bssbs-25cc1`
-> - Firestore 콘솔: https://console.firebase.google.com/project/bssbs-25cc1/firestore
+> - Firebase 프로젝트: `my-first-site-fad82`
+> - Firestore 콘솔: https://console.firebase.google.com/project/my-first-site-fad82/firestore
