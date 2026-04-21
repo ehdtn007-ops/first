@@ -1565,8 +1565,8 @@ let geocoderObj=null;
 const FBMAP={'강남구':[37.5172,127.0473],'마포구':[37.5663,126.9016],'서초구':[37.4837,127.0324],'송파구':[37.5145,127.1059],'용산구':[37.5324,126.9902],'강동구':[37.5301,127.1238],'강북구':[37.6396,127.0257],'강서구':[37.5509,126.8496],'관악구':[37.4784,126.9516],'광진구':[37.5385,127.0823],'구로구':[37.4954,126.8876],'금천구':[37.4569,126.8954],'노원구':[37.6542,127.0568],'도봉구':[37.6688,127.0471],'동대문구':[37.5744,127.0396],'동작구':[37.5124,126.9393],'서대문구':[37.5791,126.9368],'성동구':[37.5634,127.0369],'성북구':[37.5894,127.0167],'양천구':[37.5169,126.8665],'영등포구':[37.5264,126.8962],'은평구':[37.6026,126.9291],'종로구':[37.5735,126.9788],'중구':[37.5640,126.9975],'중랑구':[37.6063,127.0926]};
 
 function initMap(){
-  const ABC_LAT=37.56664537012906, ABC_LNG=126.98846590861766;
-  kakaoMap=new kakao.maps.Map(document.getElementById('kakao-map'),{center:new kakao.maps.LatLng(ABC_LAT,ABC_LNG),level:4});
+  const ABC_LAT=37.55350000000000, ABC_LNG=126.92850000000000;
+  kakaoMap=new kakao.maps.Map(document.getElementById('kakao-map'),{center:new kakao.maps.LatLng(ABC_LAT,ABC_LNG),level:5});
   kakaoMap.setMinLevel(1);kakaoMap.setMaxLevel(13);
   geocoderObj=new kakao.maps.services.Geocoder();
   placeABCPin();
