@@ -96,20 +96,33 @@ admin.initializeApp({
 `.env` 파일에 새 Firebase 서비스 계정 키를 넣는다 (backup.js용):
 - `FIREBASE_SERVICE_ACCOUNT` 값을 새 프로젝트의 서비스 계정 JSON으로 교체
 
-### 6단계: Firebase 설정 확인
+### 6단계: 카카오 개발자 콘솔 설정 변경
+
+카카오 공유(Kakao Share SDK) 사용 시, [Kakao Developers](https://developers.kakao.com) 콘솔에서 아래 항목을 새 정보로 변경한다.
+
+1. **내 애플리케이션** → 해당 앱 선택
+2. **앱 설정 → 일반**:
+   - **앱 이름**: 새 담당자/사업체 이름으로 변경
+   - **회사명**: 새 사업체 이름으로 변경
+3. **앱 설정 → 플랫폼 → Web**:
+   - **사이트 도메인**: `https://새사용자명.github.io/새리포명` 으로 변경
+4. **앱 키 변경 시**: `index.html`의 카카오 SDK 초기화 코드에서 `Kakao.init('앱키')` 와 카카오 지도 SDK `appkey=` 값도 새 앱키로 교체
+5. **루트 도메인 리다이렉트**: `새사용자명.github.io` 리포에 `/새리포명/`으로 리다이렉트하는 index.html이 있는지 확인. 없으면 생성. (카카오 공유 카드 하단 앱 이름 클릭 시 루트 도메인으로 이동하므로 404 방지 필요)
+
+### 7단계: Firebase 설정 확인
 
 새 Firebase 프로젝트에서 아래가 활성화되어 있는지 확인:
 - **Firestore Database** — 생성됨
 - **Authentication > 익명 인증** — 활성화됨 (Anonymous sign-in)
 - **Firestore 보안 규칙** — 읽기/쓰기 허용 설정됨
 
-### 7단계: 검증
+### 8단계: 검증
 
 1. `node listing/register-listing.js` 로 테스트 매물 등록 시도 → 새 Firestore에 저장되는지 확인
 2. 로컬 서버 실행 → `http://localhost:3000` 에서 지도/매물 정상 로드 확인
 3. Firebase 콘솔에서 `base_listings` 컬렉션 확인
 
-### 8단계: GitHub 동기화 (사용자 승인 후)
+### 9단계: GitHub 동기화 (사용자 승인 후)
 
 - 사용자에게 "동기화할까요?" 확인
 - 백업 파일 생성 (예: `index_backup_날짜.html`)
