@@ -5334,7 +5334,7 @@ function openSharePopup(){
 function openSharePopupFor(item){
   if(!item)return;
   _shareItem=item;
-  const url=`https://ehdtn007-ops.github.io/first/?lid=${item.lid}`;
+  const url=`https://ehdtn007-ops.github.io/first/#lid=${item.lid}`;
   const isRent=item.deal==='월세';
   const km=item.keymoney||0;
   const tot=isRent?(item.deposit||0)+km:(item.price||0)+km;
@@ -5526,7 +5526,7 @@ function copyCafePost(item,btn){
 function shareKakao(){
   const item=activePopupItem||_shareItem;
   const url=item
-    ?`https://ehdtn007-ops.github.io/first/?lid=${item.lid}`
+    ?`https://ehdtn007-ops.github.io/first/#lid=${item.lid}`
     :'https://ehdtn007-ops.github.io/first/';
   if(typeof Kakao==='undefined'||!Kakao.isInitialized()){
     alert('카카오 SDK가 로드되지 않았습니다. URL 복사를 이용해 주세요.');return;
@@ -5559,7 +5559,7 @@ function shareKakao(){
 function copyShareUrl(){
   const item=activePopupItem||_shareItem;
   const url=item
-    ?`https://ehdtn007-ops.github.io/first/?lid=${item.lid}`
+    ?`https://ehdtn007-ops.github.io/first/#lid=${item.lid}`
     :'https://ehdtn007-ops.github.io/first/';
   const btn=document.getElementById('copy-btn');
   const ok=()=>{
@@ -5575,8 +5575,8 @@ var _urlLidDone=false;
 function checkUrlLid(){
   if(_urlLidDone)return;
   try{
-    const params=new URLSearchParams(location.search);
-    const lid=params.get('lid');
+    const hash=location.hash;
+    const lid=hash.startsWith('#lid=')?hash.slice(5):null;
     if(!lid)return;
     // Firebase 데이터 로드 전이면 스킵 (loadFromFirebase 완료 후 다시 호출됨)
     if(!_firebaseReady)return;
@@ -6686,7 +6686,7 @@ async function _aiReg(d){
   }
 
   const ps = isR ? `보증금 ${_w(lst.deposit)} / 월세 ${_w(lst.monthly)}` : `매매가 ${_w(lst.price)}`;
-  const link = `https://ehdtn007-ops.github.io/first/?lid=${lid}`;
+  const link = `https://ehdtn007-ops.github.io/first/#lid=${lid}`;
   let txt = `✅ 매물 등록 완료!\n\n📌 ${lst.name}\n📍 ${lst.prov} ${lst.area} ${lst.dong}\n🏷 ${lst.type} ${lst.deal}\n💰 ${ps}`;
   if(lst.keymoney) txt += `\n💎 권리금 ${_w(lst.keymoney)}`;
   if(lst.maintenance) txt += `\n🏢 관리비 ${_w(lst.maintenance)}/월`;
