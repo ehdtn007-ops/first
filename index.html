@@ -667,6 +667,16 @@ select:hover,select:focus{border-color:var(--accent)}
   .ai-fab{bottom:14px;left:14px;width:48px;height:48px;font-size:20px}
   .ai-panel{bottom:74px;left:10px;width:calc(100vw - 20px);height:calc(100vh - 100px);border-radius:16px}
 }
+.rf-slider-wrap{padding:12px 16px;min-width:280px;}
+.rf-slider-label{display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:8px;}
+.rf-slider-label span{font-weight:700;color:var(--text);}
+.rf-slider-container{position:relative;height:28px;}
+.rf-slider-track{position:absolute;top:12px;left:0;right:0;height:4px;background:var(--border);border-radius:2px;}
+.rf-slider-fill{position:absolute;top:12px;height:4px;background:var(--accent);border-radius:2px;}
+.rf-slider-container input[type=range]{position:absolute;top:0;left:0;width:100%;height:28px;margin:0;-webkit-appearance:none;appearance:none;background:transparent;pointer-events:none;z-index:2;}
+.rf-slider-container input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;background:var(--accent);border:2px solid #fff;border-radius:50%;cursor:pointer;pointer-events:auto;box-shadow:0 1px 3px rgba(0,0,0,0.3);}
+.rf-slider-container input[type=range]::-moz-range-thumb{width:20px;height:20px;background:var(--accent);border:2px solid #fff;border-radius:50%;cursor:pointer;pointer-events:auto;box-shadow:0 1px 3px rgba(0,0,0,0.3);}
+.rf-slider-reset{display:block;margin-top:8px;text-align:center;font-size:11px;color:var(--text3);cursor:pointer;text-decoration:underline;}
 </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
@@ -1138,21 +1148,54 @@ select:hover,select:focus{border-color:var(--accent)}
     <div class="fg-h" id="ff-price-wrap"><span class="fl-h">매매가</span>
       <div class="rf-wrap">
         <button class="rf-btn" id="rf-price-btn" onclick="rfToggle('price')">전체 ▼</button>
-        <div class="rf-panel" id="rf-price-panel"><div class="rf-row" id="rf-price"></div></div>
+        <div class="rf-panel" id="rf-price-panel">
+          <div class="rf-slider-wrap">
+            <div class="rf-slider-label"><span id="rf-price-min-label">0</span><span>~</span><span id="rf-price-max-label">100억</span></div>
+            <div class="rf-slider-container">
+              <div class="rf-slider-track"></div>
+              <div class="rf-slider-fill" id="rf-price-fill"></div>
+              <input type="range" id="rf-price-min" min="0" max="200" value="0" oninput="onSlider('price')">
+              <input type="range" id="rf-price-max" min="0" max="200" value="200" oninput="onSlider('price')">
+            </div>
+            <span class="rf-slider-reset" onclick="resetSlider('price')">초기화</span>
+          </div>
+        </div>
       </div>
     </div>
     <!-- 보증금 필터 (상가/사무실 임대용) -->
     <div class="fg-h" id="ff-deposit-wrap" style="display:none"><span class="fl-h">보증금</span>
       <div class="rf-wrap">
         <button class="rf-btn" id="rf-deposit-btn" onclick="rfToggle('deposit')">전체 ▼</button>
-        <div class="rf-panel" id="rf-deposit-panel"><div class="rf-row" id="rf-deposit"></div></div>
+        <div class="rf-panel" id="rf-deposit-panel">
+          <div class="rf-slider-wrap">
+            <div class="rf-slider-label"><span id="rf-deposit-min-label">0</span><span>~</span><span id="rf-deposit-max-label">100억</span></div>
+            <div class="rf-slider-container">
+              <div class="rf-slider-track"></div>
+              <div class="rf-slider-fill" id="rf-deposit-fill"></div>
+              <input type="range" id="rf-deposit-min" min="0" max="200" value="0" oninput="onSlider('deposit')">
+              <input type="range" id="rf-deposit-max" min="0" max="200" value="200" oninput="onSlider('deposit')">
+            </div>
+            <span class="rf-slider-reset" onclick="resetSlider('deposit')">초기화</span>
+          </div>
+        </div>
       </div>
     </div>
     <!-- 월세 필터 (상가/사무실 임대용) -->
     <div class="fg-h" id="ff-monthly-wrap" style="display:none"><span class="fl-h">월세</span>
       <div class="rf-wrap">
         <button class="rf-btn" id="rf-monthly-btn" onclick="rfToggle('monthly')">전체 ▼</button>
-        <div class="rf-panel" id="rf-monthly-panel"><div class="rf-row" id="rf-monthly"></div></div>
+        <div class="rf-panel" id="rf-monthly-panel">
+          <div class="rf-slider-wrap">
+            <div class="rf-slider-label"><span id="rf-monthly-min-label">0</span><span>~</span><span id="rf-monthly-max-label">100억</span></div>
+            <div class="rf-slider-container">
+              <div class="rf-slider-track"></div>
+              <div class="rf-slider-fill" id="rf-monthly-fill"></div>
+              <input type="range" id="rf-monthly-min" min="0" max="30" value="0" oninput="onSlider('monthly')">
+              <input type="range" id="rf-monthly-max" min="0" max="30" value="30" oninput="onSlider('monthly')">
+            </div>
+            <span class="rf-slider-reset" onclick="resetSlider('monthly')">초기화</span>
+          </div>
+        </div>
       </div>
     </div>
     <!-- 층수 필터 (상가/사무실 임대용) -->
@@ -1166,7 +1209,18 @@ select:hover,select:focus{border-color:var(--accent)}
     <div class="fg-h" id="ff-area2-wrap" style="display:none"><span class="fl-h">면적</span>
       <div class="rf-wrap">
         <button class="rf-btn" id="rf-area2-btn" onclick="rfToggle('area2')">전체 ▼</button>
-        <div class="rf-panel" id="rf-area2-panel"><div class="rf-row" id="rf-area2"></div></div>
+        <div class="rf-panel" id="rf-area2-panel">
+          <div class="rf-slider-wrap">
+            <div class="rf-slider-label"><span id="rf-area2-min-label">0</span><span>~</span><span id="rf-area2-max-label">전체</span></div>
+            <div class="rf-slider-container">
+              <div class="rf-slider-track"></div>
+              <div class="rf-slider-fill" id="rf-area2-fill"></div>
+              <input type="range" id="rf-area2-min" min="0" max="30" value="0" oninput="onSlider('area2')">
+              <input type="range" id="rf-area2-max" min="0" max="30" value="30" oninput="onSlider('area2')">
+            </div>
+            <span class="rf-slider-reset" onclick="resetSlider('area2')">초기화</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1995,14 +2049,17 @@ function onLtypeChange(prefix){
 // ════════════════════════════════════════════
 // 범위 필터 (한줄 칩 — 1개 선택=이상, 2개 선택=범위)
 // ════════════════════════════════════════════
-var rfCfg={
-  price:{vals:[-1,0,5000,10000,15000,20000,30000,50000,80000,100000,300000,500000,800000,1000000],labels:['전체','0','5천','1억','1.5억','2억','3억','5억','8억','10억','30억','50억','80억','100억']},
-  deposit:{vals:[-1,0,500,1000,2000,3000,5000,7000,10000,15000,20000,30000,50000,80000,100000,300000,500000,800000,1000000],labels:['전체','0','500','1천','2천','3천','5천','7천','1억','1.5억','2억','3억','5억','8억','10억','30억','50억','80억','100억']},
-  monthly:{vals:[-1,0,30,50,80,100,150,200,300,500,700,1000,2000,3000,5000,10000],labels:['전체','0','30','50','80','100','150','200','300','500','700','1천','2천','3천','5천','1억']},
-  floor:{vals:[-1,0,1,2,3,4,5,6,7,8,9,10],labels:['전체','지하','1층','2층','3층','4층','5층','6층','7층','8층','9층','10층+']}
-  ,area2:{vals:[-1,0,33,66,99,165,231,330,495,660],labels:['전체','0','33㎡(10평)','66㎡(20평)','99㎡(30평)','165㎡(50평)','231㎡(70평)','330㎡(100평)','495㎡(150평)','660㎡(200평)']}
+var sliderCfg={
+  price:{step:5000,max:1000000,format:function(v){if(!v)return '0';if(v>=10000)return Math.floor(v/10000)+'억'+(v%10000?Math.round(v%10000/1000)+'천':'');return v.toLocaleString()+'만';}},
+  deposit:{step:500,max:100000,format:function(v){if(!v)return '0';if(v>=10000)return Math.floor(v/10000)+'억'+(v%10000?Math.round(v%10000/1000)+'천':'');return v.toLocaleString()+'만';}},
+  monthly:{step:100,max:3000,format:function(v){if(!v)return '0';return v.toLocaleString()+'만';}},
+  area2:{step:33,max:991,format:function(v){if(!v)return '0';return Math.round(v/3.3058)*10+'평('+v+'㎡)';}}
 };
-var rfSel={price:[],deposit:[],monthly:[],floor:[],area2:[]};
+var sliderSel={price:{min:0,max:0},deposit:{min:0,max:0},monthly:{min:0,max:0},area2:{min:0,max:0}};
+var rfCfg={
+  floor:{vals:[-1,0,1,2,3,4,5,6,7,8,9,10],labels:['전체','지하','1층','2층','3층','4층','5층','6층','7층','8층','9층','10층+']}
+};
+var rfSel={floor:[]};
 function initRfChips(){
   Object.keys(rfCfg).forEach(function(key){
     var row=document.getElementById('rf-'+key);
@@ -2016,6 +2073,67 @@ function initRfChips(){
       row.appendChild(c);
     });
   });
+}
+function initSliders(){
+  Object.keys(sliderCfg).forEach(function(key){
+    var cfg=sliderCfg[key];
+    var steps=Math.round(cfg.max/cfg.step);
+    var minEl=document.getElementById('rf-'+key+'-min');
+    var maxEl=document.getElementById('rf-'+key+'-max');
+    if(!minEl||!maxEl)return;
+    minEl.max=steps;maxEl.max=steps;
+    minEl.value=0;maxEl.value=steps;
+    updateSliderUI(key);
+  });
+}
+function onSlider(key){
+  var cfg=sliderCfg[key];
+  var steps=Math.round(cfg.max/cfg.step);
+  var minEl=document.getElementById('rf-'+key+'-min');
+  var maxEl=document.getElementById('rf-'+key+'-max');
+  var minV=parseInt(minEl.value),maxV=parseInt(maxEl.value);
+  if(minV>maxV-1){minEl.value=maxV-1;minV=maxV-1;}
+  sliderSel[key]={min:minV*cfg.step,max:maxV>=steps?0:maxV*cfg.step};
+  updateSliderUI(key);
+  sliderBtnText(key);
+  onFilterChange();
+}
+function updateSliderUI(key){
+  var cfg=sliderCfg[key];
+  var steps=Math.round(cfg.max/cfg.step);
+  var minEl=document.getElementById('rf-'+key+'-min');
+  var maxEl=document.getElementById('rf-'+key+'-max');
+  var fill=document.getElementById('rf-'+key+'-fill');
+  var minLbl=document.getElementById('rf-'+key+'-min-label');
+  var maxLbl=document.getElementById('rf-'+key+'-max-label');
+  if(!minEl||!maxEl)return;
+  var minV=parseInt(minEl.value),maxV=parseInt(maxEl.value);
+  var pMin=(minV/steps)*100,pMax=(maxV/steps)*100;
+  if(fill){fill.style.left=pMin+'%';fill.style.width=(pMax-pMin)+'%';}
+  if(minLbl)minLbl.textContent=cfg.format(minV*cfg.step);
+  if(maxLbl)maxLbl.textContent=maxV>=steps?'전체':cfg.format(maxV*cfg.step);
+}
+function sliderBtnText(key){
+  var btn=document.getElementById('rf-'+key+'-btn');
+  if(!btn)return;
+  var cfg=sliderCfg[key];
+  var s=sliderSel[key];
+  if(s.min===0&&s.max===0){btn.textContent='전체 ▼';return;}
+  if(s.min>0&&s.max===0){btn.textContent=cfg.format(s.min)+'~ ▼';return;}
+  if(s.min===0&&s.max>0){btn.textContent='~'+cfg.format(s.max)+' ▼';return;}
+  btn.textContent=cfg.format(s.min)+'~'+cfg.format(s.max)+' ▼';
+}
+function resetSlider(key){
+  var cfg=sliderCfg[key];
+  var steps=Math.round(cfg.max/cfg.step);
+  var minEl=document.getElementById('rf-'+key+'-min');
+  var maxEl=document.getElementById('rf-'+key+'-max');
+  if(minEl)minEl.value=0;
+  if(maxEl)maxEl.value=steps;
+  sliderSel[key]={min:0,max:0};
+  updateSliderUI(key);
+  sliderBtnText(key);
+  onFilterChange();
 }
 function rfClick(key,val){
   if(val===-1){rfSel[key]=[];} // 전체 클릭 → 리셋
@@ -2125,15 +2243,16 @@ document.addEventListener('click',function(e){
   }
 });
 initRfChips();
-rfUpdateUI('price');rfUpdateUI('deposit');rfUpdateUI('monthly');rfUpdateUI('floor');rfUpdateUI('area2');
+initSliders();
+rfUpdateUI('floor');
 updateDealFilters();
 
 function getF(){
-  var pr=rfGetRange('price');
-  var dep=rfGetRange('deposit');
-  var mon=rfGetRange('monthly');
+  var pr=sliderSel.price;
+  var dep=sliderSel.deposit;
+  var mon=sliderSel.monthly;
   var fl=rfGetRange('floor');
-  var ar2=rfGetRange('area2');
+  var ar2=sliderSel.area2;
   return{
     type:document.getElementById('ff-type').value,
     deal:document.getElementById('ff-deal').value,
@@ -2143,8 +2262,8 @@ function getF(){
     priceMin:pr.min,priceMax:pr.max,
     depositMin:dep.min,depositMax:dep.max,
     monthlyMin:mon.min,monthlyMax:mon.max,
-    floorMin:fl.min,floorMax:fl.max
-    ,area2Min:ar2.min,area2Max:ar2.max
+    floorMin:fl.min,floorMax:fl.max,
+    area2Min:ar2.min,area2Max:ar2.max
   };
 }
 function filtered(){
