@@ -1162,6 +1162,13 @@ select:hover,select:focus{border-color:var(--accent)}
         <div class="rf-panel" id="rf-floor-panel"><div class="rf-row" id="rf-floor"></div></div>
       </div>
     </div>
+    <!-- 면적 필터 (상가/사무실용) -->
+    <div class="fg-h" id="ff-area2-wrap" style="display:none"><span class="fl-h">면적</span>
+      <div class="rf-wrap">
+        <button class="rf-btn" id="rf-area2-btn" onclick="rfToggle('area2')">전체 ▼</button>
+        <div class="rf-panel" id="rf-area2-panel"><div class="rf-row" id="rf-area2"></div></div>
+      </div>
+    </div>
   </div>
   <div class="badge" id="total-badge">0건</div>
   <div class="huser" id="huser"></div>
@@ -1528,16 +1535,18 @@ function fmtPrice(item){
   if(item.deal==='월세')return `보증금 ${won(item.deposit)} / 월 ${won(item.monthly)}`;
   return won(item.price);
 }
+function toPy(m2){if(!m2)return '';return (m2/3.3058).toFixed(1);}
+function areaStr(m2){if(!m2)return '';return m2+'㎡ (약 '+toPy(m2)+'평)';}
 function pinLbl(item){
   const isRent=item.deal==='월세'||(item.type==='상가'||item.type==='사무실');
   const freeTag=item.freeKeymoney?'<span class="badge-free">무권리</span>':'';
   if(isRent){
     const dep=item.deposit||0,mon=item.monthly||0,maint=item.maintenance||0;
-    return `${freeTag?`<span class="pin-price-line" style="font-size:10px">${freeTag}</span>`:''}<span class="pin-price-line">${wonShort(dep)}/${wonShort(mon)}/${wonShort(maint)}</span><span class="pin-tot-line" style="font-size:9px">${item.floor||'-'}층 ${item.area2?item.area2+'㎡':''}</span>`;
+    return `${freeTag?`<span class="pin-price-line" style="font-size:10px">${freeTag}</span>`:''}<span class="pin-price-line">${wonShort(dep)}/${wonShort(mon)}/${wonShort(maint)}</span><span class="pin-tot-line" style="font-size:9px">${item.floor||'-'}층 ${item.area2?item.area2+'㎡('+toPy(item.area2)+'평)':''}</span>`;
   }
   const v=item.price||0;
   const priceLine=v>=10000?`${Math.floor(v/10000)}억${v%10000?Math.round((v%10000)/1000)+'천':''}`:v>0?`${v.toLocaleString()}만`:'';
-  return `<span class="pin-price-line">${priceLine}</span>`;
+  return `<span class="pin-price-line">${priceLine}</span><span class="pin-tot-line" style="font-size:9px">${item.floor?item.floor+'층':''} ${item.area2?item.area2+'㎡('+toPy(item.area2)+'평)':''}</span>`;
 }
 function pinTypeTag(item){
   const pc=pinClass(item);
@@ -1991,8 +2000,9 @@ var rfCfg={
   deposit:{vals:[-1,0,500,1000,2000,3000,5000,7000,10000,15000,20000,30000,50000,80000,100000,300000,500000,800000,1000000],labels:['전체','0','500','1천','2천','3천','5천','7천','1억','1.5억','2억','3억','5억','8억','10억','30억','50억','80억','100억']},
   monthly:{vals:[-1,0,30,50,80,100,150,200,300,500,700,1000,2000,3000,5000,10000],labels:['전체','0','30','50','80','100','150','200','300','500','700','1천','2천','3천','5천','1억']},
   floor:{vals:[-1,0,1,2,3,4,5,6,7,8,9,10],labels:['전체','지하','1층','2층','3층','4층','5층','6층','7층','8층','9층','10층+']}
+  ,area2:{vals:[-1,0,33,66,99,165,231,330,495,660],labels:['전체','0','33㎡(10평)','66㎡(20평)','99㎡(30평)','165㎡(50평)','231㎡(70평)','330㎡(100평)','495㎡(150평)','660㎡(200평)']}
 };
-var rfSel={price:[],deposit:[],monthly:[],floor:[]};
+var rfSel={price:[],deposit:[],monthly:[],floor:[],area2:[]};
 function initRfChips(){
   Object.keys(rfCfg).forEach(function(key){
     var row=document.getElementById('rf-'+key);
@@ -2047,11 +2057,13 @@ function updateFiltersByType(){
   var depositW=document.getElementById('ff-deposit-wrap');
   var monthlyW=document.getElementById('ff-monthly-wrap');
   var floorW=document.getElementById('ff-floor-wrap');
+  var area2W=document.getElementById('ff-area2-wrap');
   if(type==='건물'){
     if(priceW)priceW.style.display='';
     if(depositW)depositW.style.display='none';
     if(monthlyW)monthlyW.style.display='none';
     if(floorW)floorW.style.display='none';
+    if(area2W)area2W.style.display='none';
   } else if(type==='상가'||type==='사무실'){
     if(deal==='매매'){
       if(priceW)priceW.style.display='';
@@ -2063,11 +2075,13 @@ function updateFiltersByType(){
       if(monthlyW)monthlyW.style.display='';
     }
     if(floorW)floorW.style.display='';
+    if(area2W)area2W.style.display='';
   } else {
     if(priceW)priceW.style.display='';
     if(depositW)depositW.style.display='';
     if(monthlyW)monthlyW.style.display='';
     if(floorW)floorW.style.display='';
+    if(area2W)area2W.style.display='';
   }
 }
 function rfToggle(key){
@@ -2111,7 +2125,7 @@ document.addEventListener('click',function(e){
   }
 });
 initRfChips();
-rfUpdateUI('price');rfUpdateUI('deposit');rfUpdateUI('monthly');rfUpdateUI('floor');
+rfUpdateUI('price');rfUpdateUI('deposit');rfUpdateUI('monthly');rfUpdateUI('floor');rfUpdateUI('area2');
 updateDealFilters();
 
 function getF(){
@@ -2119,6 +2133,7 @@ function getF(){
   var dep=rfGetRange('deposit');
   var mon=rfGetRange('monthly');
   var fl=rfGetRange('floor');
+  var ar2=rfGetRange('area2');
   return{
     type:document.getElementById('ff-type').value,
     deal:document.getElementById('ff-deal').value,
@@ -2129,6 +2144,7 @@ function getF(){
     depositMin:dep.min,depositMax:dep.max,
     monthlyMin:mon.min,monthlyMax:mon.max,
     floorMin:fl.min,floorMax:fl.max
+    ,area2Min:ar2.min,area2Max:ar2.max
   };
 }
 function filtered(){
@@ -2168,6 +2184,12 @@ function filtered(){
       const fv=item.floor||0;
       if(f.floorMin>0&&fv<f.floorMin)return false;
       if(f.floorMax>0&&fv>f.floorMax)return false;
+    }
+    // 면적 범위 필터 (상가/사무실에 적용)
+    if((item.type==='상가'||item.type==='사무실')&&(f.area2Min>0||f.area2Max>0)){
+      const av=item.area2||0;
+      if(f.area2Min>0&&av<f.area2Min)return false;
+      if(f.area2Max>0&&av>f.area2Max)return false;
     }
     return true;
   });
@@ -2323,7 +2345,7 @@ function renderBoard(){
       ${currentUser&&isRent&&km&&km!=='문의'&&km>0?`<div class="bcard-total" style="font-size:11px;color:var(--text2)">권리금 ${won(km)}</div>`:''}
       <div class="bcard-meta">
         <span>🏢 ${item.floor||'-'}층</span>
-        ${item.area2?`<span>📐 ${item.area2}㎡</span>`:''}
+        ${item.area2?`<span>📐 ${areaStr(item.area2)}</span>`:''}
         ${item.direction?`<span>🧭 ${item.direction}</span>`:''}
       </div>`;
     card.addEventListener('click',()=>showBoardDetail(item));
@@ -2354,7 +2376,7 @@ function showBoardDetail(item){
     priceHtml=`<div class="price-grid" style="grid-template-columns:1fr"><div class="price-cell full highlight" style="text-align:center;padding:18px"><div class="price-label">매매가</div><div class="price-val accent" style="font-size:28px;font-weight:900;margin-top:4px">${won(item.price||0)}</div></div></div>`;
   }
   priceHtml+=`<div class="rooms-row">
-    <div class="rooms-chip"><div class="rooms-chip-label">면적</div><div class="rooms-chip-val" style="font-size:15px">${item.area2||'-'}<span style="font-size:11px;font-weight:500">㎡</span></div></div>
+    <div class="rooms-chip"><div class="rooms-chip-label">면적</div><div class="rooms-chip-val" style="font-size:15px">${item.area2?item.area2+'<span style="font-size:11px;font-weight:500">㎡</span> <span style="font-size:11px;color:var(--text2)">(약 '+toPy(item.area2)+'평)</span>':'-'}</div></div>
     <div class="rooms-chip"><div class="rooms-chip-label">층수</div><div class="rooms-chip-val">${item.floor||'-'}<span style="font-size:12px;font-weight:500">층</span></div></div>
   </div>`;
 
@@ -2549,7 +2571,7 @@ function render(){
         ${isRent?`<div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px">보증금 ${won(item.deposit||0)} / 월세 ${won(item.monthly||0)} / 관리비 ${won(item.maintenance||0)}</div>`:''}
         <div class="cmeta">
           <span>🏢 ${item.floor||'-'}층</span>
-          ${item.area2?`<span>📐 ${item.area2}㎡</span>`:''}
+          ${item.area2?`<span>📐 ${areaStr(item.area2)}</span>`:''}
           <span>📍 ${currentUser?fullAddr(item):maskAddr(item)}</span>
         </div>`;
       c.addEventListener('click',()=>{
@@ -2886,7 +2908,7 @@ function renderFavList(){
       ${isRent&&kmFreeTag?`<div style="margin-bottom:4px">${kmFreeTag}</div>`:''}
       <div class="cname">${item.no?'<span style="font-size:10px;font-weight:800;color:#1a1200;background:#FEE500;border-radius:5px;padding:2px 8px;white-space:nowrap;margin-right:4px">매물번호 '+item.no+'</span>':''}${item.name}</div>
       ${isRent?`<div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px">보증금 ${won(item.deposit||0)} / 월세 ${won(item.monthly||0)} / 관리비 ${won(item.maintenance||0)}</div>`:`<div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px">${won(item.price||0)}</div>`}
-      <div class="cmeta"><span>🏢 ${item.floor||'-'}층</span>${item.area2?`<span>📐 ${item.area2}㎡</span>`:''}<span>📍 ${currentUser?fullAddr(item):maskAddr(item)}</span></div>`;
+      <div class="cmeta"><span>🏢 ${item.floor||'-'}층</span>${item.area2?`<span>📐 ${areaStr(item.area2)}</span>`:''}<span>📍 ${currentUser?fullAddr(item):maskAddr(item)}</span></div>`;
     c.addEventListener('click',()=>{
       activeId=item.lid;activePopupItem=item;render();showPopup(item);
       if(!kakaoMap)return;
@@ -2981,7 +3003,7 @@ function showPopup(item){
   }
   // 면적 + 층수
   priceHtml+=`<div class="rooms-row">
-    <div class="rooms-chip"><div class="rooms-chip-label">면적</div><div class="rooms-chip-val" style="font-size:15px">${item.area2||'-'}<span style="font-size:11px;font-weight:500">㎡</span></div></div>
+    <div class="rooms-chip"><div class="rooms-chip-label">면적</div><div class="rooms-chip-val" style="font-size:15px">${item.area2?item.area2+'<span style="font-size:11px;font-weight:500">㎡</span> <span style="font-size:11px;color:var(--text2)">(약 '+toPy(item.area2)+'평)</span>':'-'}</div></div>
     <div class="rooms-chip"><div class="rooms-chip-label">층수</div><div class="rooms-chip-val">${item.floor||'-'}<span style="font-size:12px;font-weight:500">층</span></div></div>
   </div>`;
 
@@ -4170,7 +4192,7 @@ async function genAdCopy(p){
 매물명: ${name}
 위치: ${location}
 가격: ${priceInfo}
-면적: ${area2}㎡
+면적: ${area2}㎡${area2?' (약 '+(area2/3.3058).toFixed(1)+'평)':''}
 층수: ${floor}층 / 총 ${totalfloor}층
 방향: ${direction}
 주차: ${parking}대
@@ -5338,7 +5360,7 @@ function openSharePopupFor(item){
   const isRent=item.deal==='월세';
   const km=item.keymoney||0;
   const tot=isRent?(item.deposit||0)+km:(item.price||0)+km;
-  const areaDesc=item.area2?`${item.area2}㎡`:'';
+  const areaDesc=item.area2?areaStr(item.area2):'';
   let infoHtml=`${item.no?`<span style="font-size:10px;font-weight:800;color:#1a1200;background:#FEE500;border-radius:5px;padding:2px 8px;white-space:nowrap;margin-right:4px">매물번호 ${item.no}</span> `:''}` + `<strong style="font-size:14px">${item.name}</strong><br>`;
   if(isRent){
     infoHtml+=`보증금 ${won(item.deposit||0)} / 월세 ${won(item.monthly||0)}`;
@@ -5384,14 +5406,14 @@ function copyCafeText(item,btn){
     item.no?`매물번호 : ${item.no}`:'',
     `지 역 : ${fullAddr(item)}`,
     ...priceLines.filter(Boolean),
-    item.area2?`면 적 : ${item.area2}㎡`:'',
+    item.area2?`면 적 : ${areaStr(item.area2)}`:'',
     item.maintenance?`관 리 비 : ${won(item.maintenance)}/월`:'',
     `중개대상물종류 : ${item.type}`,
     `중개거래형태 : ${combiLabel(item)}, 입주가능일 : ${item.movein||'협의'}`,
     item.parking!=null?`주차대수 : ${item.parking}대`:'',
     item.direction?`방향 : ${item.direction}`:'',
     item.floor?`해당 층수 : ${item.floor}층 / 총 ${item.totalfloor||'-'}층`:'',
-    item.area2?`면적 : ${item.area2}㎡`:'',
+    item.area2?`면적 : ${areaStr(item.area2)}`:'',
     `위반건축물 : ${item.illegal||'해당없음'}`,
     ``,
     item.desc&&item.desc.trim()?`설 명 :\n${item.desc}\n`:'',
@@ -5436,12 +5458,12 @@ function copyCafePost(item,btn){
     isRent?['임 대 료', won(item.monthly||0)]:null,
     ['권 리 금', km===0?'무권리':(km>0?won(km):'-')],
     ['합 금 액', won(tot)],
-    item.area2?['면 적', item.area2+'㎡']:null,
+    item.area2?['면 적', areaStr(item.area2)]:null,
     ['관 리 비', item.maintenance?won(item.maintenance)+'/월':'-'],
     ['중개대상물종류', item.type],
     ['중개거래형태, 입주가능일 승인일자', `${combiLabel(item)}, ${item.movein||'협의'} 입주`],
     ['주차대수, 방향', [item.parking!=null?item.parking+'대':'', item.direction||''].filter(Boolean).join(', ')||'-'],
-    ['해당 층수,\n면적 중개거래형태', [item.floor?item.floor+'층':'', item.area2?item.area2+'㎡':'', item.deal].filter(Boolean).join(' ')],
+    ['해당 층수,\n면적 중개거래형태', [item.floor?item.floor+'층':'', item.area2?areaStr(item.area2):'', item.deal].filter(Boolean).join(' ')],
     ['설 명', item.desc||''],
   ].filter(Boolean);
 
@@ -6628,7 +6650,7 @@ async function _aiReg(d){
 위치: ${location}
 가격: ${priceInfo}
 권리금: ${lst.keymoney||0}만원
-면적: ${lst.area2}㎡
+면적: ${lst.area2?areaStr(lst.area2):'-'}
 층수: ${lst.floor}층 / 총 ${lst.totalfloor}층
 주차: ${lst.parking}대
 준공: ${lst.year}년
@@ -6694,7 +6716,7 @@ async function _aiReg(d){
   if(lst.totalfloor) txt += `\n🏢 총 ${lst.totalfloor}층`;
   if(lst.parking) txt += `\n🅿️ 주차 ${lst.parking}대`;
   if(lst.year) txt += `\n📅 준공 ${lst.year}년`;
-  if(lst.area2) txt += `\n📐 면적 ${lst.area2}㎡`;
+  if(lst.area2) txt += `\n📐 면적 ${areaStr(lst.area2)}`;
   if(lst.mainPurpose) txt += `\n🏗 주용도: ${lst.mainPurpose}`;
   // gsType 필드 제거됨 (상가/사무실/건물 시스템에서 불필요)
   txt += bldgInfo;
@@ -7022,7 +7044,7 @@ function renderRecentList(){
       +'<div class="ctop"><div style="display:flex;gap:4px;align-items:center"><span class="dtag '+pinClass(item)+'">'+combiLabel(item)+'</span>'+kmFreeTag+'</div>'
       +'<span class="cprice">'+(isRent?'보'+wonShort(item.deposit)+'/월'+wonShort(item.monthly||0):wonShort(item.price))+'</span></div>'
       +'<div class="cname">'+(item.no?'<span style="font-size:10px;font-weight:800;color:#1a1200;background:#FEE500;border-radius:5px;padding:2px 8px;white-space:nowrap;margin-right:4px">매물번호 '+item.no+'</span>':'')+item.name+'</div>'
-      +'<div class="cmeta"><span>📍 '+(currentUser?fullAddr(item):maskAddr(item))+'</span>'+(item.area2?'<span>📐 '+item.area2+'㎡</span>':'')+'</div>';
+      +'<div class="cmeta"><span>📍 '+(currentUser?fullAddr(item):maskAddr(item))+'</span>'+(item.area2?'<span>📐 '+areaStr(item.area2)+'</span>':'')+'</div>';
     c.addEventListener('click',function(){
       activeId=item.lid;activePopupItem=item;render();showPopup(item);
       if(!kakaoMap)return;
